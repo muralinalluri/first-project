@@ -1,0 +1,19 @@
+{
+  "name": "voice-transcription-summary",
+  "version": "1.0.0",
+  "description": "Voice recording, transcription, summarization, and follow-up email generator",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "email": "node src/email-skill.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {}
+}

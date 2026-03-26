@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meeting Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🎙</span>
+        <div>
+          <h1>Meeting Assistant</h1>
+          <p>Record · Transcribe · Summarize · Follow up</p>
+        </div>
+      </div>
+      <div id="api-status" class="api-status checking">Checking API…</div>
+    </div>
+  </header>
+
+  <!-- ── Steps progress bar ── -->
+  <div class="steps-bar">
+    <div class="step active" data-step="1">
+      <div class="step-dot">1</div>
+      <span>Record</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" data-step="2">
+      <div class="step-dot">2</div>
+      <span>Transcribe</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" data-step="3">
+      <div class="step-dot">3</div>
+      <span>Summarize</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step" data-step="4">
+      <div class="step-dot">4</div>
+      <span>Email</span>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ════════════════════════════════════════════
+         PANEL 1 — RECORD
+    ═══════════════════════════════════════════════ -->
+    <section class="panel active" id="panel-record">
+      <div class="panel-header">
+        <h2>Record Meeting</h2>
+        <p>Start recording your meeting, then stop when done. Or upload an existing audio file.</p>
+      </div>
+
+      <div class="record-area">
+        <div class="visualizer-wrap">
+          <canvas id="visualizer" width="600" height="80"></canvas>
+        </div>
+
+        <div class="timer" id="timer">00:00</div>
+
+        <div class="record-controls">
+          <button id="btn-record" class="btn-record">
+            <span class="btn-record-icon">●</span>
+            Start Recording
+          </button>
+          <button id="btn-stop" class="btn-stop" disabled>
+            <span>■</span> Stop
+          </button>
+        </div>
+
+        <div class="divider"><span>or</span></div>
+
+        <label class="upload-area" id="upload-area">
+          <input type="file" id="file-input" accept="audio/*,video/*" hidden />
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span id="upload-label">Click to upload audio / video file</span>
+        </label>
+      </div>
+
+      <div id="audio-preview" class="audio-preview hidden">
+        <audio id="audio-player" controls></audio>
+        <div class="audio-info">
+          <span id="audio-filename"></span>
+          <span id="audio-duration"></span>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button id="btn-to-transcribe" class="btn-primary" disabled>
+          Transcribe →
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         PANEL 2 — TRANSCRIBE
+    ═══════════════════════════════════════════════ -->
+    <section class="panel" id="panel-transcribe">
+      <div class="panel-header">
+        <h2>Transcription</h2>
+        <p>Claude will transcribe your audio. You can also edit the transcript before summarizing.</p>
+      </div>
+
+      <div id="transcribe-loading" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Transcribing with Claude AI…</p>
+      </div>
+
+      <div id="transcribe-content" class="hidden">
+        <div class="textarea-toolbar">
+          <span class="word-count" id="word-count">0 words</span>
+          <button class="btn-ghost" id="btn-clear-transcript">Clear</button>
+        </div>
+        <textarea id="transcript-text" placeholder="Transcript will appear here…" rows="12" spellcheck="true"></textarea>
+      </div>
+
+      <div id="transcribe-empty" class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p>No audio loaded yet. Go back to record or upload a file.</p>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btn-back-to-record">← Back</button>
+
+        <div class="meeting-meta">
+          <input id="meeting-name" type="text" placeholder="Meeting name (optional)" class="meta-input" />
+          <input id="attendees" type="text" placeholder="Attendees, comma-separated (optional)" class="meta-input" />
+        </div>
+
+        <button id="btn-to-summarize" class="btn-primary" disabled>
+          Summarize →
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         PANEL 3 — SUMMARY
+    ═══════════════════════════════════════════════ -->
+    <section class="panel" id="panel-summary">
+      <div class="panel-header">
+        <h2>Meeting Summary</h2>
+        <p>Structured summary generated by Claude AI.</p>
+      </div>
+
+      <div id="summary-loading" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Summarizing meeting with Claude AI…</p>
+      </div>
+
+      <div id="summary-content" class="hidden">
+
+        <div class="summary-meta-bar">
+          <span id="sum-title" class="sum-title"></span>
+          <span class="badge" id="sum-sentiment"></span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card" id="card-overview">
+            <h3>Overview</h3>
+            <p id="sum-overview"></p>
+          </div>
+
+          <div class="summary-card" id="card-points">
+            <h3>Key Points</h3>
+            <ul id="sum-keypoints"></ul>
+          </div>
+
+          <div class="summary-card" id="card-decisions">
+            <h3>Decisions Made</h3>
+            <ul id="sum-decisions"></ul>
+          </div>
+
+          <div class="summary-card full-width" id="card-actions">
+            <h3>Action Items</h3>
+            <table class="action-table">
+              <thead>
+                <tr><th>Task</th><th>Owner</th><th>Deadline</th></tr>
+              </thead>
+              <tbody id="sum-actions"></tbody>
+            </table>
+          </div>
+
+          <div class="summary-card" id="card-nextsteps">
+            <h3>Next Steps</h3>
+            <ul id="sum-nextsteps"></ul>
+          </div>
+
+          <div class="summary-card" id="card-attendees">
+            <h3>Attendees</h3>
+            <div id="sum-attendees" class="attendee-chips"></div>
+          </div>
+        </div>
+
+        <div class="download-bar">
+          <span class="saved-label">Saved:</span>
+          <a id="link-summary-json" class="download-link" href="#">summary.json</a>
+          <a id="link-summary-md" class="download-link" href="#">summary.md</a>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btn-back-to-transcribe">← Back</button>
+        <button id="btn-to-email" class="btn-primary" disabled>
+          Generate Email →
+        </button>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         PANEL 4 — EMAIL
+    ═══════════════════════════════════════════════ -->
+    <section class="panel" id="panel-email">
+      <div class="panel-header">
+        <h2>Follow-up Email</h2>
+        <p>Customize and generate a professional follow-up email for attendees.</p>
+      </div>
+
+      <div class="email-options">
+        <div class="form-row">
+          <label>Email Tone</label>
+          <div class="tone-buttons">
+            <button class="tone-btn active" data-tone="formal">Formal</button>
+            <button class="tone-btn" data-tone="friendly">Friendly</button>
+            <button class="tone-btn" data-tone="concise">Concise</button>
+            <button class="tone-btn" data-tone="detailed">Detailed</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="sender-name">Your Name</label>
+          <input id="sender-name" type="text" placeholder="Meeting Organizer" class="form-input" />
+        </div>
+        <div class="form-row">
+          <label for="sender-title">Your Title</label>
+          <input id="sender-title" type="text" placeholder="e.g. Product Manager (optional)" class="form-input" />
+        </div>
+        <div class="form-row">
+          <label for="email-recipients">Recipients</label>
+          <input id="email-recipients" type="text" placeholder="alice@co.com, bob@co.com (optional)" class="form-input" />
+        </div>
+        <button id="btn-generate-email" class="btn-primary">
+          Generate Email
+        </button>
+      </div>
+
+      <div id="email-loading" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Drafting follow-up email with Claude AI…</p>
+      </div>
+
+      <div id="email-content" class="hidden">
+        <div class="email-preview">
+          <div class="email-subject-bar">
+            <strong>Subject:</strong>
+            <span id="email-subject"></span>
+          </div>
+          <div id="email-body" class="email-body"></div>
+        </div>
+
+        <div class="email-actions-bar">
+          <button class="btn-ghost" id="btn-copy-email">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy plain text
+          </button>
+          <div class="download-bar">
+            <span class="saved-label">Saved:</span>
+            <a id="link-email-html" class="download-link" href="#">email.html</a>
+            <a id="link-email-txt" class="download-link" href="#">email.txt</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btn-back-to-summary">← Back</button>
+        <button class="btn-ghost" id="btn-start-over">Start Over</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Toast ── -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
