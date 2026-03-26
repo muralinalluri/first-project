@@ -2,25 +2,17 @@
   "name": "voice-transcription-summary",
   "version": "1.0.0",
   "description": "Voice recording, transcription, summarization, and follow-up email generator",
-  "main": "src/index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "record": "node src/record.js",
-    "transcribe": "node src/transcribe.js",
-    "summarize": "node src/summarize.js",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
     "email": "node src/email-skill.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "node-record-lpcm16": "^1.0.1",
-    "wav": "^1.0.2",
-    "form-data": "^4.0.1",
-    "node-fetch": "^3.3.2",
-    "chalk": "^5.3.0",
-    "inquirer": "^9.2.12",
-    "ora": "^8.0.1",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {}

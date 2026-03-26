@@ -40,18 +40,17 @@ export ANTHROPIC_API_KEY=your_api_key_here
 ### 3. Run the app
 
 ```bash
-node src/index.js
+node server.js
 ```
 
-## Menu Options
+Then open **http://localhost:3000** in your browser.
 
-| Option | Description |
-|--------|-------------|
-| `1` | Record a new meeting via microphone |
-| `2` | Transcribe an existing audio file (WAV, MP3, MP4, etc.) |
-| `3` | Paste or type meeting notes for summarization |
-| `4` | Generate a follow-up email from a saved summary |
-| `5` | Full pipeline: Record → Transcribe → Summarize → Email |
+## UI Steps
+
+1. **Record** — record via microphone or upload an existing audio file
+2. **Transcribe** — Claude transcribes the audio; edit before proceeding
+3. **Summarize** — structured summary with key points, decisions, and action items
+4. **Email** — choose tone and generate a follow-up email ready to send
 
 ## Follow-up Email Skill
 
@@ -86,8 +85,12 @@ Recordings are saved to `recordings/` as WAV files.
 ## Project Structure
 
 ```
+server.js         # Express web server + API routes
+public/
+  index.html      # Single-page UI
+  styles.css      # Styles
+  app.js          # Frontend JS
 src/
-  index.js        # Main interactive CLI
   config.js       # Configuration and validation
   recorder.js     # Voice recording module
   transcriber.js  # Audio transcription via Claude API

@@ -1,7 +1,7 @@
 Generate a professional follow-up email from the most recent meeting summary.
 
 Look in the `outputs/` directory for the latest `summary-*.json` file.
-If there is no summary file, ask the user to run the app first (`node src/index.js`).
+If there is no summary file, ask the user to run the app first (`node server.js`, then open http://localhost:3000).
 
 Once you have the summary, invoke the email skill by running:
 ```
