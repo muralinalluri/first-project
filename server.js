@@ -8,12 +8,13 @@
 
 import express from 'express';
 import multer from 'multer';
-import { mkdirSync, existsSync, writeFileSync, readFileSync } from 'fs';
+import { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Transcriber } from './src/transcriber.js';
 import { Summarizer } from './src/summarizer.js';
 import { EmailSkill } from './src/email-skill.js';
+import { AgendaSkill } from './src/agenda-skill.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -107,6 +108,153 @@ app.post('/api/email', async (req, res) => {
     console.error('[email]', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getAllSummaries() {
+  if (!existsSync('outputs')) return [];
+  return readdirSync('outputs')
+    .filter(f => f.startsWith('summary-') && f.endsWith('.json'))
+    .sort()
+    .map(f => {
+      try { return { id: f.replace('.json', ''), data: JSON.parse(readFileSync(join('outputs', f), 'utf-8')) }; }
+      catch { return null; }
+    })
+    .filter(Boolean);
+}
+
+function getLatestSummary() {
+  const all = getAllSummaries();
+  return all.length ? all[all.length - 1].data : null;
+}
+
+// ─── GET /api/meetings ────────────────────────────────────────────────────────
+app.get('/api/meetings', (req, res) => {
+  const summaries = getAllSummaries().reverse();
+  const meetings = summaries.map(({ id, data }) => ({
+    id,
+    title: data.title || 'Untitled Meeting',
+    date: data.date || '',
+    sentiment: data.sentiment || 'neutral',
+    attendeeCount: data.attendees?.length || 0,
+    actionItemCount: data.actionItems?.length || 0,
+    overview: data.overview || '',
+    keyPoints: data.keyPoints || [],
+    decisions: data.decisions || [],
+    actionItems: data.actionItems || [],
+    nextSteps: data.nextSteps || [],
+    attendees: data.attendees || [],
+  }));
+  res.json({ meetings });
+});
+
+// ─── POST /api/skills/create-agenda ──────────────────────────────────────────
+app.post('/api/skills/create-agenda', async (req, res) => {
+  const summary = getLatestSummary();
+  if (!summary) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+  try {
+    const skill = new AgendaSkill();
+    const agenda = await skill.generateAgenda(summary);
+    res.json({ agenda, title: summary.title });
+  } catch (err) {
+    console.error('[create-agenda]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/skills/export-action-items ────────────────────────────────────
+app.post('/api/skills/export-action-items', (req, res) => {
+  const summaries = getAllSummaries();
+  if (!summaries.length) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+
+  let markdownLines = [];
+  let slackLines = [];
+  let totalCount = 0;
+
+  summaries.reverse().forEach(({ data }) => {
+    if (!data.actionItems?.length) return;
+    markdownLines.push(`## ${data.title || 'Meeting'} (${data.date || ''})`);
+    markdownLines.push('| Task | Owner | Deadline |');
+    markdownLines.push('|------|-------|----------|');
+    slackLines.push(`*${data.title || 'Meeting'}*`);
+    data.actionItems.forEach(item => {
+      markdownLines.push(`| ${item.task} | ${item.owner} | ${item.deadline} |`);
+      slackLines.push(`□ ${item.task} (${item.owner}) — Due: ${item.deadline}`);
+      totalCount++;
+    });
+    markdownLines.push('');
+    slackLines.push('');
+  });
+
+  const markdown = `# Action Items — All Meetings\n\n${markdownLines.join('\n')}`;
+  const slack = slackLines.join('\n');
+
+  res.json({ markdown, slack, count: totalCount });
+});
+
+// ─── POST /api/skills/meeting-stats ──────────────────────────────────────────
+app.post('/api/skills/meeting-stats', (req, res) => {
+  const summaries = getAllSummaries();
+  if (!summaries.length) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+
+  const sentiment = { positive: 0, neutral: 0, negative: 0 };
+  const attendeeCount = {};
+  const ownerCount = {};
+  let totalActionItems = 0;
+  let actionItemsWithDeadline = 0;
+  let followUpCount = 0;
+
+  summaries.forEach(({ data }) => {
+    const s = (data.sentiment || 'neutral').toLowerCase();
+    if (s in sentiment) sentiment[s]++;
+    data.attendees?.forEach(a => { attendeeCount[a] = (attendeeCount[a] || 0) + 1; });
+    data.actionItems?.forEach(item => {
+      totalActionItems++;
+      if (item.deadline && item.deadline !== 'Not specified') actionItemsWithDeadline++;
+      if (item.owner && item.owner !== 'TBD') ownerCount[item.owner] = (ownerCount[item.owner] || 0) + 1;
+    });
+    if (data.followUpRequired) followUpCount++;
+  });
+
+  const topAttendees = Object.entries(attendeeCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topOwners = Object.entries(ownerCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const total = summaries.length;
+  const avgActions = total ? (totalActionItems / total).toFixed(1) : 0;
+
+  const report = [
+    `## 📊 Meeting Stats Report`,
+    ``,
+    `### 📅 Overview`,
+    `- **Total meetings:** ${total}`,
+    `- **Date range:** ${summaries[0].data.date || 'N/A'} → ${summaries[total - 1].data.date || 'N/A'}`,
+    `- **Total action items:** ${totalActionItems}`,
+    `- **Avg action items per meeting:** ${avgActions}`,
+    `- **Meetings requiring follow-up:** ${followUpCount}`,
+    ``,
+    `### 😊 Sentiment Breakdown`,
+    `- ✅ Positive: ${sentiment.positive}`,
+    `- 😐 Neutral: ${sentiment.neutral}`,
+    `- ⚠️ Negative: ${sentiment.negative}`,
+    ``,
+    `### ✅ Action Item Insights`,
+    `- Total: ${totalActionItems}`,
+    `- With specific deadlines: ${actionItemsWithDeadline}`,
+    `- Without deadlines: ${totalActionItems - actionItemsWithDeadline}`,
+    topOwners.length ? `- Top assignees: ${topOwners.map(([n, c]) => `${n} (${c})`).join(', ')}` : '',
+    ``,
+    `### 👥 Top Attendees`,
+    topAttendees.length
+      ? topAttendees.map(([name, count]) => `- ${name}: ${count} meeting${count > 1 ? 's' : ''}`).join('\n')
+      : '- No attendee data recorded',
+  ].filter(l => l !== undefined).join('\n');
+
+  res.json({ report, totalMeetings: total, sentiment, totalActionItems });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

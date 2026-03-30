@@ -509,3 +509,158 @@ $('btn-start-over').addEventListener('click', () => {
 
 /* ── Init ───────────────────────────────────────────────────────────────────── */
 checkApiStatus();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MEETINGS DASHBOARD
+════════════════════════════════════════════════════════════════════════════ */
+let meetingsData = [];
+
+// ── Open / close overlay ─────────────────────────────────────────────────────
+$('btn-meetings').addEventListener('click', () => {
+  show($('meetings-overlay'));
+  loadMeetings();
+});
+
+$('btn-close-meetings').addEventListener('click', () => hide($('meetings-overlay')));
+
+$('meetings-overlay').addEventListener('click', e => {
+  if (e.target === $('meetings-overlay')) hide($('meetings-overlay'));
+});
+
+// ── Load meetings list ────────────────────────────────────────────────────────
+async function loadMeetings() {
+  const list = $('meetings-list');
+  // Clear previous cards (keep the empty message element)
+  Array.from(list.children).forEach(c => { if (c.id !== 'meetings-empty') c.remove(); });
+
+  try {
+    const res = await fetch('/api/meetings');
+    const data = await res.json();
+    meetingsData = data.meetings || [];
+
+    if (!meetingsData.length) {
+      show($('meetings-empty'));
+      return;
+    }
+    hide($('meetings-empty'));
+    meetingsData.forEach((meeting, i) => list.appendChild(renderMeetingCard(meeting, i)));
+  } catch {
+    show($('meetings-empty'));
+    $('meetings-empty').textContent = 'Failed to load meetings. Is the server running?';
+  }
+}
+
+// ── Render a meeting card ─────────────────────────────────────────────────────
+function renderMeetingCard(meeting, index) {
+  const card = document.createElement('div');
+  card.className = 'meeting-card';
+  const sentiment = (meeting.sentiment || 'neutral').toLowerCase();
+  card.innerHTML = `
+    <div class="meeting-card-title">${esc(meeting.title)}</div>
+    <div class="meeting-card-meta">
+      <span class="meeting-card-date">${esc(meeting.date)}</span>
+      <span class="badge ${sentiment}">${esc(sentiment)}</span>
+      <span class="meeting-card-stat">${meeting.attendeeCount} attendee${meeting.attendeeCount !== 1 ? 's' : ''}</span>
+      <span class="meeting-card-stat">${meeting.actionItemCount} action${meeting.actionItemCount !== 1 ? 's' : ''}</span>
+    </div>
+  `;
+  card.addEventListener('click', () => openMeetingDetail(index));
+  return card;
+}
+
+// ── Meeting detail modal ──────────────────────────────────────────────────────
+function openMeetingDetail(index) {
+  const m = meetingsData[index];
+  $('modal-title').textContent = m.title;
+
+  const body = $('modal-body');
+  const list = items => items?.length
+    ? `<ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
+    : '<p style="color:var(--text-muted);font-style:italic">None noted</p>';
+
+  const actionTable = m.actionItems?.length
+    ? `<table class="action-table"><thead><tr><th>Task</th><th>Owner</th><th>Deadline</th></tr></thead><tbody>
+        ${m.actionItems.map(i => `<tr><td>${esc(i.task)}</td><td>${esc(i.owner)}</td><td>${esc(i.deadline)}</td></tr>`).join('')}
+      </tbody></table>`
+    : '<p style="color:var(--text-muted);font-style:italic">No action items</p>';
+
+  body.innerHTML = `
+    <h3>Overview</h3><p>${esc(m.overview)}</p>
+    <h3>Key Points</h3>${list(m.keyPoints)}
+    <h3>Decisions Made</h3>${list(m.decisions)}
+    <h3>Action Items</h3>${actionTable}
+    <h3>Next Steps</h3>${list(m.nextSteps)}
+    ${m.attendees?.length ? `<h3>Attendees</h3><div class="attendee-chips">${m.attendees.map(a => `<span class="chip">${esc(a)}</span>`).join('')}</div>` : ''}
+  `;
+
+  show($('meeting-detail-modal'));
+}
+
+$('btn-close-modal').addEventListener('click', () => hide($('meeting-detail-modal')));
+$('meeting-detail-modal').addEventListener('click', e => {
+  if (e.target === $('meeting-detail-modal')) hide($('meeting-detail-modal'));
+});
+
+// ── Skill result helpers ──────────────────────────────────────────────────────
+function showSkillResult(title, loading, content = '') {
+  const area = $('skill-result-area');
+  show(area);
+  $('skill-result-title').textContent = title;
+  if (loading) {
+    show($('skill-loading'));
+    $('skill-loading-text').textContent = content || 'Running…';
+    hide($('skill-result-content'));
+  } else {
+    hide($('skill-loading'));
+    $('skill-result-content').textContent = content;
+    show($('skill-result-content'));
+  }
+}
+
+$('btn-close-skill-result').addEventListener('click', () => hide($('skill-result-area')));
+
+$('btn-copy-skill-result').addEventListener('click', () => {
+  const text = $('skill-result-content').textContent;
+  navigator.clipboard.writeText(text)
+    .then(() => toast('Copied!'))
+    .catch(() => toast('Copy failed'));
+});
+
+// ── Skill: Create Agenda ──────────────────────────────────────────────────────
+$('skill-agenda').addEventListener('click', async () => {
+  showSkillResult('Create Agenda', true, 'Generating agenda with Claude AI…');
+  try {
+    const res = await fetch('/api/skills/create-agenda', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSkillResult('Create Agenda', false, data.agenda);
+  } catch (err) {
+    showSkillResult('Create Agenda', false, `Error: ${err.message}`);
+  }
+});
+
+// ── Skill: Export Action Items ────────────────────────────────────────────────
+$('skill-export').addEventListener('click', async () => {
+  showSkillResult('Export Action Items', true, 'Collecting action items…');
+  try {
+    const res = await fetch('/api/skills/export-action-items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSkillResult('Export Action Items', false, `${data.count} action item${data.count !== 1 ? 's' : ''} found\n\n--- MARKDOWN ---\n${data.markdown}\n\n--- SLACK ---\n${data.slack}`);
+  } catch (err) {
+    showSkillResult('Export Action Items', false, `Error: ${err.message}`);
+  }
+});
+
+// ── Skill: Meeting Stats ──────────────────────────────────────────────────────
+$('skill-stats').addEventListener('click', async () => {
+  showSkillResult('Meeting Stats', true, 'Analyzing meetings…');
+  try {
+    const res = await fetch('/api/skills/meeting-stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSkillResult('Meeting Stats', false, data.report);
+  } catch (err) {
+    showSkillResult('Meeting Stats', false, `Error: ${err.message}`);
+  }
+});

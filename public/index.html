@@ -18,7 +18,10 @@
           <p>Record · Transcribe · Summarize · Follow up</p>
         </div>
       </div>
-      <div id="api-status" class="api-status checking">Checking API…</div>
+      <div class="header-right">
+        <div id="api-status" class="api-status checking">Checking API…</div>
+        <button id="btn-meetings" class="btn-meetings-header">📋 Meetings</button>
+      </div>
     </div>
   </header>
 
@@ -284,6 +287,61 @@
 
   <!-- ── Toast ── -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- ── Meetings Dashboard Overlay ── -->
+  <div id="meetings-overlay" class="meetings-overlay hidden">
+    <div class="meetings-panel">
+
+      <div class="meetings-panel-header">
+        <h2>Meetings</h2>
+        <button id="btn-close-meetings" class="btn-close-meetings">✕</button>
+      </div>
+
+      <!-- Skills -->
+      <div class="meetings-section">
+        <div class="meetings-section-title">Skills</div>
+        <div class="skills-buttons">
+          <button class="btn-skill" id="skill-agenda">📅 Create Agenda</button>
+          <button class="btn-skill" id="skill-export">✅ Export Action Items</button>
+          <button class="btn-skill" id="skill-stats">📊 Meeting Stats</button>
+        </div>
+      </div>
+
+      <!-- Skill result -->
+      <div id="skill-result-area" class="skill-result-area hidden">
+        <div class="skill-result-header">
+          <span id="skill-result-title" class="skill-result-title"></span>
+          <button id="btn-copy-skill-result" class="btn-ghost btn-copy-result">Copy</button>
+          <button id="btn-close-skill-result" class="btn-ghost">✕</button>
+        </div>
+        <div id="skill-loading" class="loading-state hidden">
+          <div class="spinner"></div>
+          <p id="skill-loading-text">Running skill…</p>
+        </div>
+        <pre id="skill-result-content" class="skill-result-content hidden"></pre>
+      </div>
+
+      <!-- Past meetings list -->
+      <div class="meetings-section">
+        <div class="meetings-section-title">Past Meetings</div>
+        <div id="meetings-list" class="meetings-list">
+          <div id="meetings-empty" class="meetings-empty hidden">No meetings saved yet. Complete a meeting through the app first.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Meeting Detail Modal ── -->
+  <div id="meeting-detail-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="modal-title" class="modal-title"></span>
+        <button id="btn-close-modal" class="btn-close-meetings">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
