@@ -511,28 +511,27 @@ $('btn-start-over').addEventListener('click', () => {
 checkApiStatus();
 
 /* ════════════════════════════════════════════════════════════════════════════
-   MEETINGS DASHBOARD
+   SPA PAGE ROUTING
+════════════════════════════════════════════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  const page = document.getElementById(`page-${name}`);
+  if (page) { page.classList.add('active'); window.scrollTo({ top: 0 }); }
+
+  if (name === 'meetings') loadMeetings();
+  if (name === 'insights') loadInsights(document.querySelector('.range-tab.active')?.dataset.range || 'all');
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MEETINGS PAGE
 ════════════════════════════════════════════════════════════════════════════ */
 let meetingsData = [];
 let selectedMeetingIndex = null;
-
-// ── Open / close overlay ─────────────────────────────────────────────────────
-$('btn-meetings').addEventListener('click', () => {
-  show($('meetings-overlay'));
-  loadMeetings();
-});
-
-$('btn-close-meetings').addEventListener('click', () => {
-  hide($('meetings-overlay'));
-  clearMeetingSelection();
-});
-
-$('meetings-overlay').addEventListener('click', e => {
-  if (e.target === $('meetings-overlay')) {
-    hide($('meetings-overlay'));
-    clearMeetingSelection();
-  }
-});
 
 $('btn-clear-selection').addEventListener('click', clearMeetingSelection);
 
@@ -746,20 +745,11 @@ const CATEGORY_COLORS = {
 
 let insightsCache = {};  // keyed by range
 
-$('btn-insights').addEventListener('click', () => {
-  show($('insights-overlay'));
-  loadInsights(document.querySelector('.range-tab.active')?.dataset.range || 'all');
-});
-
-$('btn-close-insights').addEventListener('click', () => { hide($('insights-overlay')); insightsCache = {}; });
-$('insights-overlay').addEventListener('click', e => {
-  if (e.target === $('insights-overlay')) hide($('insights-overlay'));
-});
-
 document.querySelectorAll('.range-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    insightsCache = {};
     loadInsights(btn.dataset.range);
   });
 });
