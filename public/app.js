@@ -751,7 +751,7 @@ $('btn-insights').addEventListener('click', () => {
   loadInsights(document.querySelector('.range-tab.active')?.dataset.range || 'all');
 });
 
-$('btn-close-insights').addEventListener('click', () => hide($('insights-overlay')));
+$('btn-close-insights').addEventListener('click', () => { hide($('insights-overlay')); insightsCache = {}; });
 $('insights-overlay').addEventListener('click', e => {
   if (e.target === $('insights-overlay')) hide($('insights-overlay'));
 });
@@ -821,18 +821,18 @@ function renderWordCloud(keywords) {
   const maxCount = Math.max(...keywords.map(k => k.count), 1);
   const usedCategories = new Set();
 
-  keywords.forEach((kw, i) => {
+  // Sort largest first so big words anchor the center of the cloud
+  const sorted = [...keywords].sort((a, b) => b.count - a.count);
+
+  sorted.forEach(kw => {
     const ratio = kw.count / maxCount;
     const fontSize = (0.82 + ratio * 1.9).toFixed(2);
     const color = CATEGORY_COLORS[kw.category] || CATEGORY_COLORS.other;
-    // subtle alternating rotation for visual depth
-    const rotations = [0, -4, 3, -2, 5, -3, 2, -5, 4, -1];
-    const rot = rotations[i % rotations.length];
 
     const span = document.createElement('span');
     span.className = 'word-cloud-item';
     span.textContent = kw.word;
-    span.style.cssText = `font-size:${fontSize}rem;color:${color};transform:rotate(${rot}deg);opacity:${(0.55 + ratio * 0.45).toFixed(2)}`;
+    span.style.cssText = `font-size:${fontSize}rem;color:${color};opacity:${(0.6 + ratio * 0.4).toFixed(2)}`;
     span.title = `${kw.word} · ${kw.count} meeting${kw.count !== 1 ? 's' : ''} · ${kw.category}`;
     container.appendChild(span);
     usedCategories.add(kw.category);
