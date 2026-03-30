@@ -150,7 +150,14 @@ app.get('/api/meetings', (req, res) => {
 
 // ─── POST /api/skills/create-agenda ──────────────────────────────────────────
 app.post('/api/skills/create-agenda', async (req, res) => {
-  const summary = getLatestSummary();
+  const { summaryId } = req.body;
+  let summary;
+  if (summaryId) {
+    const found = getAllSummaries().find(s => s.id === summaryId);
+    summary = found?.data || null;
+  } else {
+    summary = getLatestSummary();
+  }
   if (!summary) {
     return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
   }
@@ -166,9 +173,13 @@ app.post('/api/skills/create-agenda', async (req, res) => {
 
 // ─── POST /api/skills/export-action-items ────────────────────────────────────
 app.post('/api/skills/export-action-items', (req, res) => {
-  const summaries = getAllSummaries();
+  const { summaryId } = req.body;
+  let summaries = getAllSummaries();
   if (!summaries.length) {
     return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+  if (summaryId) {
+    summaries = summaries.filter(s => s.id === summaryId);
   }
 
   let markdownLines = [];

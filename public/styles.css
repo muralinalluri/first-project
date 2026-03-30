@@ -701,7 +701,27 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   box-shadow: var(--shadow);
 }
 .meeting-card:hover { border-color: var(--navy); box-shadow: 0 2px 12px rgba(0,48,135,.12); }
-.meeting-card-title { font-weight: 600; font-size: .92rem; color: var(--text); margin-bottom: .4rem; }
+.meeting-card.selected {
+  border-color: var(--navy);
+  background: var(--bg3);
+  box-shadow: 0 0 0 3px rgba(0,48,135,.12);
+}
+.meeting-card.selected .meeting-card-title { color: var(--navy); }
+.meeting-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+.meeting-card-title { font-weight: 600; font-size: .92rem; color: var(--text); }
+.btn-view-detail {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .75rem;
+  padding: .2rem .55rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .2s, color .2s;
+  flex-shrink: 0;
+}
+.btn-view-detail:hover { border-color: var(--navy); color: var(--navy); }
 .meeting-card-meta  { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 .meeting-card-date  { font-size: .78rem; color: var(--text-muted); }
 .meeting-card-stat  {
@@ -711,6 +731,37 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   padding: .15rem .5rem;
   border-radius: 999px;
   color: var(--text-muted);
+}
+
+.skill-meeting-indicator {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--navy);
+  color: #fff;
+  padding: .5rem .75rem;
+  border-radius: var(--radius);
+  margin-bottom: .75rem;
+  font-size: .82rem;
+}
+.skill-meeting-label { opacity: .7; white-space: nowrap; }
+.skill-meeting-name  { font-weight: 700; flex: 1; }
+.btn-clear-selection {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,.7);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 0 .25rem;
+  line-height: 1;
+}
+.btn-clear-selection:hover { color: #fff; }
+
+.skill-no-selection {
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: .75rem;
+  font-style: italic;
 }
 
 /* ── Meeting detail modal ────────────────────────────────────────────────── */

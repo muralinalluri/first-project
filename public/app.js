@@ -514,6 +514,7 @@ checkApiStatus();
    MEETINGS DASHBOARD
 ════════════════════════════════════════════════════════════════════════════ */
 let meetingsData = [];
+let selectedMeetingIndex = null;
 
 // ── Open / close overlay ─────────────────────────────────────────────────────
 $('btn-meetings').addEventListener('click', () => {
@@ -521,17 +522,45 @@ $('btn-meetings').addEventListener('click', () => {
   loadMeetings();
 });
 
-$('btn-close-meetings').addEventListener('click', () => hide($('meetings-overlay')));
+$('btn-close-meetings').addEventListener('click', () => {
+  hide($('meetings-overlay'));
+  clearMeetingSelection();
+});
 
 $('meetings-overlay').addEventListener('click', e => {
-  if (e.target === $('meetings-overlay')) hide($('meetings-overlay'));
+  if (e.target === $('meetings-overlay')) {
+    hide($('meetings-overlay'));
+    clearMeetingSelection();
+  }
 });
+
+$('btn-clear-selection').addEventListener('click', clearMeetingSelection);
+
+function clearMeetingSelection() {
+  selectedMeetingIndex = null;
+  document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
+  hide($('skill-meeting-indicator'));
+  show($('skill-no-selection'));
+}
+
+function selectMeeting(index) {
+  selectedMeetingIndex = index;
+  document.querySelectorAll('.meeting-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === index);
+  });
+  $('skill-meeting-name').textContent = meetingsData[index].title;
+  show($('skill-meeting-indicator'));
+  hide($('skill-no-selection'));
+}
 
 // ── Load meetings list ────────────────────────────────────────────────────────
 async function loadMeetings() {
   const list = $('meetings-list');
   // Clear previous cards (keep the empty message element)
   Array.from(list.children).forEach(c => { if (c.id !== 'meetings-empty') c.remove(); });
+  selectedMeetingIndex = null;
+  hide($('skill-meeting-indicator'));
+  show($('skill-no-selection'));
 
   try {
     const res = await fetch('/api/meetings');
@@ -556,7 +585,10 @@ function renderMeetingCard(meeting, index) {
   card.className = 'meeting-card';
   const sentiment = (meeting.sentiment || 'neutral').toLowerCase();
   card.innerHTML = `
-    <div class="meeting-card-title">${esc(meeting.title)}</div>
+    <div class="meeting-card-top">
+      <div class="meeting-card-title">${esc(meeting.title)}</div>
+      <button class="btn-view-detail" title="View full summary">View →</button>
+    </div>
     <div class="meeting-card-meta">
       <span class="meeting-card-date">${esc(meeting.date)}</span>
       <span class="badge ${sentiment}">${esc(sentiment)}</span>
@@ -564,7 +596,16 @@ function renderMeetingCard(meeting, index) {
       <span class="meeting-card-stat">${meeting.actionItemCount} action${meeting.actionItemCount !== 1 ? 's' : ''}</span>
     </div>
   `;
-  card.addEventListener('click', () => openMeetingDetail(index));
+  // Click card = select for skills
+  card.addEventListener('click', e => {
+    if (e.target.closest('.btn-view-detail')) return;
+    selectMeeting(index);
+  });
+  // Click "View →" = open detail modal
+  card.querySelector('.btn-view-detail').addEventListener('click', e => {
+    e.stopPropagation();
+    openMeetingDetail(index);
+  });
   return card;
 }
 
@@ -626,41 +667,55 @@ $('btn-copy-skill-result').addEventListener('click', () => {
     .catch(() => toast('Copy failed'));
 });
 
+// ── Skill helpers ─────────────────────────────────────────────────────────────
+function selectedSummaryId() {
+  return selectedMeetingIndex !== null ? meetingsData[selectedMeetingIndex]?.id : null;
+}
+
+function skillLabel(base) {
+  if (selectedMeetingIndex !== null) return `${base} — ${meetingsData[selectedMeetingIndex].title}`;
+  return `${base} — Latest Meeting`;
+}
+
 // ── Skill: Create Agenda ──────────────────────────────────────────────────────
 $('skill-agenda').addEventListener('click', async () => {
-  showSkillResult('Create Agenda', true, 'Generating agenda with Claude AI…');
+  const label = skillLabel('Create Agenda');
+  showSkillResult(label, true, 'Generating agenda with Claude AI…');
   try {
-    const res = await fetch('/api/skills/create-agenda', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const body = JSON.stringify({ summaryId: selectedSummaryId() });
+    const res = await fetch('/api/skills/create-agenda', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showSkillResult('Create Agenda', false, data.agenda);
+    showSkillResult(label, false, data.agenda);
   } catch (err) {
-    showSkillResult('Create Agenda', false, `Error: ${err.message}`);
+    showSkillResult(label, false, `Error: ${err.message}`);
   }
 });
 
 // ── Skill: Export Action Items ────────────────────────────────────────────────
 $('skill-export').addEventListener('click', async () => {
-  showSkillResult('Export Action Items', true, 'Collecting action items…');
+  const label = skillLabel('Export Action Items');
+  showSkillResult(label, true, 'Collecting action items…');
   try {
-    const res = await fetch('/api/skills/export-action-items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const body = JSON.stringify({ summaryId: selectedSummaryId() });
+    const res = await fetch('/api/skills/export-action-items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showSkillResult('Export Action Items', false, `${data.count} action item${data.count !== 1 ? 's' : ''} found\n\n--- MARKDOWN ---\n${data.markdown}\n\n--- SLACK ---\n${data.slack}`);
+    showSkillResult(label, false, `${data.count} action item${data.count !== 1 ? 's' : ''} found\n\n--- MARKDOWN ---\n${data.markdown}\n\n--- SLACK ---\n${data.slack}`);
   } catch (err) {
-    showSkillResult('Export Action Items', false, `Error: ${err.message}`);
+    showSkillResult(label, false, `Error: ${err.message}`);
   }
 });
 
 // ── Skill: Meeting Stats ──────────────────────────────────────────────────────
 $('skill-stats').addEventListener('click', async () => {
-  showSkillResult('Meeting Stats', true, 'Analyzing meetings…');
+  showSkillResult('Meeting Stats — All Meetings', true, 'Analyzing meetings…');
   try {
     const res = await fetch('/api/skills/meeting-stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showSkillResult('Meeting Stats', false, data.report);
+    showSkillResult('Meeting Stats — All Meetings', false, data.report);
   } catch (err) {
-    showSkillResult('Meeting Stats', false, `Error: ${err.message}`);
+    showSkillResult('Meeting Stats — All Meetings', false, `Error: ${err.message}`);
   }
 });
