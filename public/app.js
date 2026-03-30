@@ -72,6 +72,8 @@ let timerInterval = null;
 let timerSeconds = 0;
 let analyser = null;
 let animFrame = null;
+let recognition = null;
+let speechTranscript = '';
 
 function formatTime(s) {
   const m = Math.floor(s / 60).toString().padStart(2, '0');
@@ -91,7 +93,7 @@ function drawVisualizer() {
     const data = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(data);
 
-    ctx.fillStyle = '#1e2535';
+    ctx.fillStyle = '#003087';
     ctx.fillRect(0, 0, W, H);
 
     const bars = 60;
@@ -101,7 +103,11 @@ function drawVisualizer() {
       const v = data[idx] / 255;
       const h = v * H * 0.9;
       const alpha = 0.5 + v * 0.5;
-      ctx.fillStyle = `rgba(99,102,241,${alpha})`;
+      // Gradient from blue to gold based on intensity
+      const r = Math.round(0 + v * 181);
+      const g = Math.round(94 + v * 52);
+      const b = Math.round(184 * (1 - v * 0.7));
+      ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
       ctx.beginPath();
       ctx.roundRect(i * barW + 1, (H - h) / 2, barW - 2, h, 2);
       ctx.fill();
@@ -147,6 +153,26 @@ async function startRecording() {
 
     mediaRecorder.start(100);
 
+    // Speech recognition for transcription
+    speechTranscript = '';
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      let finalTranscript = '';
+      recognition.onresult = e => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+          else interim += e.results[i][0].transcript;
+        }
+        speechTranscript = (finalTranscript + interim).trim();
+      };
+      recognition.start();
+    }
+
     // Timer
     timerSeconds = 0;
     $('timer').textContent = '00:00';
@@ -171,6 +197,7 @@ function stopRecording() {
   if (mediaRecorder?.state !== 'inactive') {
     mediaRecorder.stop();
   }
+  if (recognition) { recognition.stop(); recognition = null; }
   clearInterval(timerInterval);
   $('timer').classList.remove('recording');
   $('btn-record').classList.remove('recording');
@@ -234,27 +261,23 @@ $('btn-to-transcribe').addEventListener('click', async () => {
   show($('transcribe-loading'));
   $('btn-to-summarize').disabled = true;
 
-  try {
-    const formData = new FormData();
-    formData.append('audio', state.audioBlob, state.audioFilename);
+  hide($('transcribe-loading'));
 
-    const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || 'Transcription failed');
-
-    state.transcript = data.transcript;
+  if (speechTranscript) {
+    // Use transcript captured via Web Speech API during recording
+    state.transcript = speechTranscript;
     $('transcript-text').value = state.transcript;
     updateWordCount();
-    hide($('transcribe-loading'));
     show($('transcribe-content'));
     $('btn-to-summarize').disabled = false;
-
-  } catch (err) {
-    hide($('transcribe-loading'));
-    show($('transcribe-empty'));
-    $('transcribe-empty').querySelector('p').textContent = `Error: ${err.message}`;
-    toast(`Transcription failed: ${err.message}`, 5000);
+  } else {
+    // Uploaded file or speech API unavailable — prompt manual entry
+    state.transcript = '';
+    $('transcript-text').value = '';
+    updateWordCount();
+    show($('transcribe-content'));
+    $('btn-to-summarize').disabled = true;
+    toast('Speech recognition unavailable for uploaded files. Please type or paste the transcript below.', 6000);
   }
 });
 
