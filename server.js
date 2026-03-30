@@ -15,6 +15,7 @@ import { Transcriber } from './src/transcriber.js';
 import { Summarizer } from './src/summarizer.js';
 import { EmailSkill } from './src/email-skill.js';
 import { AgendaSkill } from './src/agenda-skill.js';
+import { InsightsSkill } from './src/insights-skill.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -290,6 +291,36 @@ app.post('/api/skills/meeting-stats', (req, res) => {
   ].filter(l => l !== undefined).join('\n');
 
   res.json({ report, totalMeetings: total, sentiment, totalActionItems });
+});
+
+// ─── POST /api/insights ───────────────────────────────────────────────────────
+app.post('/api/insights', async (req, res) => {
+  const { range = 'all' } = req.body;
+  let summaries = getAllSummaries();
+
+  if (range !== 'all') {
+    const days = { '7d': 7, '30d': 30, '90d': 90 }[range] || 30;
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    summaries = summaries.filter(({ id }) => {
+      const raw = id.replace('summary-', '');
+      const normalized = raw.replace(/T(\d{2})-(\d{2})-(\d{2})$/, 'T$1:$2:$3');
+      return new Date(normalized) >= cutoff;
+    });
+  }
+
+  if (!summaries.length) {
+    return res.status(404).json({ error: 'No meetings found for this time range.' });
+  }
+
+  try {
+    const skill = new InsightsSkill();
+    const insights = await skill.extractKeywords(summaries);
+    res.json({ ...insights, meetingCount: summaries.length, range,
+      meetingTitles: summaries.map(s => s.data.title || 'Untitled') });
+  } catch (err) {
+    console.error('[insights]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

@@ -786,6 +786,196 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 .btn-tone-mini.active { border-color: var(--navy); background: var(--navy); color: #fff; font-weight: 600; }
 .btn-tone-mini:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
 
+/* ── Insights panel ──────────────────────────────────────────────────────── */
+.insights-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,24,70,.5);
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: fadeIn .2s ease;
+}
+.insights-panel {
+  width: 100%;
+  max-width: 920px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0,48,135,.2);
+  overflow: hidden;
+  margin: auto 0;
+}
+.insights-header {
+  background: var(--navy);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+.insights-header h2 { color: #fff; font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
+.range-tabs { display: flex; gap: .4rem; flex: 1; flex-wrap: wrap; }
+.range-tab {
+  border: 1px solid rgba(255,255,255,.3);
+  background: transparent;
+  color: rgba(255,255,255,.7);
+  padding: .3rem .75rem;
+  border-radius: 6px;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.range-tab.active { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.7); color: #fff; font-weight: 600; }
+.range-tab:hover:not(.active) { background: rgba(255,255,255,.08); color: #fff; }
+
+.insights-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 2rem; }
+.insights-section { }
+.insights-section-title {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: .6rem;
+}
+.insights-meta { font-size: .8rem; color: var(--text-muted); margin-bottom: .75rem; }
+.insights-hint { font-size: .78rem; color: var(--text-muted); margin-bottom: .6rem; font-style: italic; }
+
+/* Word cloud */
+.word-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
+  align-items: center;
+  padding: 1.75rem 1.5rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 130px;
+  box-shadow: var(--shadow);
+}
+.word-cloud-item {
+  cursor: default;
+  transition: transform .15s;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.word-cloud-item:hover { transform: scale(1.12); }
+.word-cloud-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+  margin-top: .75rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .72rem;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Bar chart */
+.bar-chart { display: flex; flex-direction: column; gap: .55rem; }
+.bar-row { display: flex; align-items: center; gap: .75rem; }
+.bar-label {
+  width: 130px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar-track {
+  flex: 1;
+  background: var(--bg3);
+  border-radius: 4px;
+  height: 30px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: .55rem;
+  min-width: 32px;
+  transition: width .6s ease;
+}
+.bar-count { font-size: .76rem; font-weight: 700; color: #fff; }
+.bar-category {
+  width: 80px;
+  font-size: .72rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Heatmap */
+.heatmap-container { overflow-x: auto; }
+.heatmap-table { border-collapse: collapse; width: 100%; }
+.heatmap-header-row th { padding: 0; vertical-align: bottom; }
+.heatmap-corner { width: 130px; }
+.heatmap-meeting-th {
+  min-width: 60px;
+  max-width: 80px;
+  padding-bottom: .4rem;
+  text-align: center;
+}
+.heatmap-meeting-label {
+  display: block;
+  font-size: .65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  height: 75px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 auto;
+  max-width: 20px;
+}
+.heatmap-keyword-row td { border: 1px solid var(--border); }
+.heatmap-keyword-cell {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: .45rem .75rem;
+  white-space: nowrap;
+  background: var(--bg2);
+  min-width: 130px;
+}
+.heatmap-data-cell {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+  min-width: 60px;
+  height: 36px;
+  cursor: default;
+  transition: outline .1s;
+}
+.heatmap-data-cell:hover { outline: 2px solid var(--gold); outline-offset: -2px; }
+
 /* ── Meeting detail modal ────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;

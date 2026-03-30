@@ -730,6 +730,193 @@ $('skill-email').addEventListener('click', async () => {
   }
 });
 
+/* ════════════════════════════════════════════════════════════════════════════
+   INSIGHTS TAB
+════════════════════════════════════════════════════════════════════════════ */
+const CATEGORY_COLORS = {
+  economics:  '#B5923A',
+  finance:    '#003087',
+  hr:         '#005EB8',
+  technology: '#0891B2',
+  strategy:   '#7C3AED',
+  market:     '#0D7A4E',
+  operations: '#C2410C',
+  other:      '#5A7399',
+};
+
+let insightsCache = {};  // keyed by range
+
+$('btn-insights').addEventListener('click', () => {
+  show($('insights-overlay'));
+  loadInsights(document.querySelector('.range-tab.active')?.dataset.range || 'all');
+});
+
+$('btn-close-insights').addEventListener('click', () => hide($('insights-overlay')));
+$('insights-overlay').addEventListener('click', e => {
+  if (e.target === $('insights-overlay')) hide($('insights-overlay'));
+});
+
+document.querySelectorAll('.range-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadInsights(btn.dataset.range);
+  });
+});
+
+async function loadInsights(range) {
+  if (insightsCache[range]) {
+    renderInsights(insightsCache[range]);
+    return;
+  }
+
+  hide($('insights-content'));
+  hide($('insights-empty'));
+  show($('insights-loading'));
+
+  try {
+    const res = await fetch('/api/insights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ range }),
+    });
+    const data = await res.json();
+    hide($('insights-loading'));
+
+    if (!res.ok) {
+      $('insights-empty-msg').textContent = data.error || 'No data available.';
+      show($('insights-empty'));
+      return;
+    }
+
+    insightsCache[range] = data;
+    renderInsights(data);
+  } catch (err) {
+    hide($('insights-loading'));
+    $('insights-empty-msg').textContent = 'Failed to load insights. Is the server running?';
+    show($('insights-empty'));
+  }
+}
+
+function renderInsights(data) {
+  hide($('insights-loading'));
+  hide($('insights-empty'));
+
+  $('insights-meta').textContent =
+    `${data.meetingCount} meeting${data.meetingCount !== 1 ? 's' : ''} analysed · ${data.keywords.length} keywords extracted`;
+
+  renderWordCloud(data.keywords);
+  renderBarChart(data.keywords);
+  renderHeatmap(data.heatmapData, data.meetingTitles);
+  show($('insights-content'));
+}
+
+// ── Word Cloud ────────────────────────────────────────────────────────────────
+function renderWordCloud(keywords) {
+  const container = $('word-cloud');
+  container.innerHTML = '';
+
+  if (!keywords.length) { container.textContent = 'No keywords found.'; return; }
+
+  const maxCount = Math.max(...keywords.map(k => k.count), 1);
+  const usedCategories = new Set();
+
+  keywords.forEach((kw, i) => {
+    const ratio = kw.count / maxCount;
+    const fontSize = (0.82 + ratio * 1.9).toFixed(2);
+    const color = CATEGORY_COLORS[kw.category] || CATEGORY_COLORS.other;
+    // subtle alternating rotation for visual depth
+    const rotations = [0, -4, 3, -2, 5, -3, 2, -5, 4, -1];
+    const rot = rotations[i % rotations.length];
+
+    const span = document.createElement('span');
+    span.className = 'word-cloud-item';
+    span.textContent = kw.word;
+    span.style.cssText = `font-size:${fontSize}rem;color:${color};transform:rotate(${rot}deg);opacity:${(0.55 + ratio * 0.45).toFixed(2)}`;
+    span.title = `${kw.word} · ${kw.count} meeting${kw.count !== 1 ? 's' : ''} · ${kw.category}`;
+    container.appendChild(span);
+    usedCategories.add(kw.category);
+  });
+
+  // Legend
+  const legend = $('word-cloud-legend');
+  legend.innerHTML = '';
+  [...usedCategories].forEach(cat => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-dot" style="background:${CATEGORY_COLORS[cat] || CATEGORY_COLORS.other}"></span>${cat}`;
+    legend.appendChild(item);
+  });
+}
+
+// ── Bar Chart ─────────────────────────────────────────────────────────────────
+function renderBarChart(keywords) {
+  const container = $('bar-chart');
+  container.innerHTML = '';
+
+  const top12 = keywords.slice(0, 12);
+  const maxCount = Math.max(...top12.map(k => k.count), 1);
+
+  top12.forEach(kw => {
+    const pct = ((kw.count / maxCount) * 100).toFixed(1);
+    const color = CATEGORY_COLORS[kw.category] || CATEGORY_COLORS.other;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label" title="${esc(kw.word)}">${esc(kw.word)}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${color}">
+          <span class="bar-count">${kw.count}</span>
+        </div>
+      </div>
+      <div class="bar-category">${esc(kw.category)}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ── Heatmap ───────────────────────────────────────────────────────────────────
+function renderHeatmap(heatmapData, meetingTitles) {
+  const container = $('heatmap');
+  if (!heatmapData.length) { container.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">Not enough data to render heatmap.</p>'; return; }
+
+  // Cap at 10 most recent meetings
+  const maxMeetings = 10;
+  const sliceStart = Math.max(0, meetingTitles.length - maxMeetings);
+  const titles = meetingTitles.slice(sliceStart);
+
+  let html = `<table class="heatmap-table"><thead><tr class="heatmap-header-row">
+    <th class="heatmap-corner"></th>
+    ${titles.map(t => `<th class="heatmap-meeting-th"><span class="heatmap-meeting-label">${esc(t.substring(0, 14))}${t.length > 14 ? '…' : ''}</span></th>`).join('')}
+  </tr></thead><tbody>`;
+
+  heatmapData.forEach(kw => {
+    const color = CATEGORY_COLORS[kw.category] || CATEGORY_COLORS.other;
+    const meetingSlice = kw.meetings.slice(sliceStart);
+    const maxVal = Math.max(...meetingSlice.map(m => m.count), 1);
+
+    html += `<tr class="heatmap-keyword-row">
+      <td class="heatmap-keyword-cell">${esc(kw.word)}</td>
+      ${meetingSlice.map(m => {
+        if (!m.count) return `<td class="heatmap-data-cell" style="background:var(--bg3)" title="${esc(kw.word)} — ${esc(m.title)}: 0"></td>`;
+        const opacity = (0.2 + (m.count / maxVal) * 0.8).toFixed(2);
+        const bg = hexToRgba(color, opacity);
+        return `<td class="heatmap-data-cell" style="background:${bg}" title="${esc(kw.word)} — ${esc(m.title)}: ${m.count} mention${m.count !== 1 ? 's' : ''}">${m.count}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function hexToRgba(hex, opacity) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${opacity})`;
+}
+
 // ── Skill: Meeting Stats ──────────────────────────────────────────────────────
 $('skill-stats').addEventListener('click', async () => {
   showSkillResult('Meeting Stats — All Meetings', true, 'Analyzing meetings…');
