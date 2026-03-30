@@ -207,6 +207,30 @@ app.post('/api/skills/export-action-items', (req, res) => {
   res.json({ markdown, slack, count: totalCount });
 });
 
+// ─── POST /api/skills/generate-email ─────────────────────────────────────────
+app.post('/api/skills/generate-email', async (req, res) => {
+  const { summaryId, tone = 'formal' } = req.body;
+  let summary;
+  if (summaryId) {
+    const found = getAllSummaries().find(s => s.id === summaryId);
+    summary = found?.data || null;
+  } else {
+    summary = getLatestSummary();
+  }
+  if (!summary) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+  try {
+    const skill = new EmailSkill();
+    const email = await skill.generateEmail(summary, { tone });
+    const { htmlPath, txtPath } = skill.saveEmail(email);
+    res.json({ email, htmlPath, txtPath, title: summary.title });
+  } catch (err) {
+    console.error('[generate-email]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── POST /api/skills/meeting-stats ──────────────────────────────────────────
 app.post('/api/skills/meeting-stats', (req, res) => {
   const summaries = getAllSummaries();

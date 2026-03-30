@@ -707,6 +707,29 @@ $('skill-export').addEventListener('click', async () => {
   }
 });
 
+// ── Skill: Follow-up Email ────────────────────────────────────────────────────
+document.querySelectorAll('.btn-tone-mini').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-tone-mini').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+$('skill-email').addEventListener('click', async () => {
+  const tone = document.querySelector('.btn-tone-mini.active')?.dataset.tone || 'formal';
+  const label = skillLabel(`Follow-up Email (${tone})`);
+  showSkillResult(label, true, 'Drafting email with Claude AI…');
+  try {
+    const body = JSON.stringify({ summaryId: selectedSummaryId(), tone });
+    const res = await fetch('/api/skills/generate-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSkillResult(label, false, `Subject: ${data.email.subject}\n\n${data.email.plainText}\n\n---\nSaved: ${data.txtPath}`);
+  } catch (err) {
+    showSkillResult(label, false, `Error: ${err.message}`);
+  }
+});
+
 // ── Skill: Meeting Stats ──────────────────────────────────────────────────────
 $('skill-stats').addEventListener('click', async () => {
   showSkillResult('Meeting Stats — All Meetings', true, 'Analyzing meetings…');
