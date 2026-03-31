@@ -642,26 +642,28 @@ $('meeting-detail-modal').addEventListener('click', e => {
   if (e.target === $('meeting-detail-modal')) hide($('meeting-detail-modal'));
 });
 
-// ── Skill result helpers ──────────────────────────────────────────────────────
+// ── Skill result modal ────────────────────────────────────────────────────────
 function showSkillResult(title, loading, content = '') {
-  const area = $('skill-result-area');
-  show(area);
-  $('skill-result-title').textContent = title;
+  $('skill-modal-title').textContent = title;
+  show($('skill-modal'));
   if (loading) {
-    show($('skill-loading'));
-    $('skill-loading-text').textContent = content || 'Running…';
-    hide($('skill-result-content'));
+    show($('skill-modal-loading'));
+    $('skill-modal-loading-text').textContent = content || 'Running…';
+    hide($('skill-modal-content'));
+    hide($('btn-copy-skill-modal'));
   } else {
-    hide($('skill-loading'));
-    $('skill-result-content').textContent = content;
-    show($('skill-result-content'));
+    hide($('skill-modal-loading'));
+    $('skill-modal-content').textContent = content;
+    show($('skill-modal-content'));
+    show($('btn-copy-skill-modal'));
   }
 }
 
-$('btn-close-skill-result').addEventListener('click', () => hide($('skill-result-area')));
+$('btn-close-skill-modal').addEventListener('click', () => hide($('skill-modal')));
+$('skill-modal').addEventListener('click', e => { if (e.target === $('skill-modal')) hide($('skill-modal')); });
 
-$('btn-copy-skill-result').addEventListener('click', () => {
-  const text = $('skill-result-content').textContent;
+$('btn-copy-skill-modal').addEventListener('click', () => {
+  const text = $('skill-modal-content').textContent;
   navigator.clipboard.writeText(text)
     .then(() => toast('Copied!'))
     .catch(() => toast('Copy failed'));
