@@ -42,6 +42,7 @@ export class EmailSkill {
       senderName = 'Meeting Organizer',
       senderTitle = '',
       recipients = [],
+      emailType = 'follow-up',
     } = options;
 
     const toneInstruction = EMAIL_TONE_PROMPTS[tone] || EMAIL_TONE_PROMPTS.formal;
@@ -52,8 +53,10 @@ export class EmailSkill {
 
     const summaryText = this._summaryToText(summary);
 
+    const isThankYou = emailType === 'thank-you';
+
     const prompt = `You are a professional business communication expert.
-Generate a follow-up email based on this meeting summary.
+Generate a ${isThankYou ? 'thank-you' : 'follow-up'} email based on this meeting summary.
 
 ${toneInstruction}
 
@@ -63,20 +66,25 @@ Sender: ${senderName}${senderTitle ? ` (${senderTitle})` : ''}
 Meeting Summary:
 ${summaryText}
 
-Generate a complete follow-up email. Return a JSON object with this structure:
+Generate a complete ${isThankYou ? 'thank-you' : 'follow-up'} email. Return a JSON object with this structure:
 {
   "subject": "Email subject line",
   "body": "Full email body in HTML format with proper paragraphs and lists",
   "plainText": "Full email body in plain text format"
 }
 
-The email should:
+${isThankYou ? `The thank-you email should:
+1. Open with sincere thanks for attendees' time and participation
+2. Highlight what was accomplished or decided in the meeting
+3. Briefly acknowledge each person's contribution if attendees are listed
+4. Express enthusiasm about the outcomes and next steps
+5. Close warmly and professionally` : `The email should:
 1. Thank attendees for their time
 2. Recap the key discussion points briefly
 3. List decisions made
 4. Clearly state action items with owners and deadlines
 5. Outline next steps
-6. Include a professional closing
+6. Include a professional closing`}
 
 Return only the JSON object, no other text.`;
 

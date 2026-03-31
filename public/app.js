@@ -706,21 +706,42 @@ $('skill-export').addEventListener('click', async () => {
   }
 });
 
-// ── Skill: Follow-up Email ────────────────────────────────────────────────────
+// ── Skill: Email tone selectors (scoped by data-group) ────────────────────────
 document.querySelectorAll('.btn-tone-mini').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.btn-tone-mini').forEach(b => b.classList.remove('active'));
+    const group = btn.dataset.group;
+    document.querySelectorAll(`.btn-tone-mini[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
 });
 
+function getGroupTone(group) {
+  return document.querySelector(`.btn-tone-mini.active[data-group="${group}"]`)?.dataset.tone || 'formal';
+}
+
 $('skill-email').addEventListener('click', async () => {
-  const tone = document.querySelector('.btn-tone-mini.active')?.dataset.tone || 'formal';
+  const tone = getGroupTone('followup');
   const label = skillLabel(`Follow-up Email (${tone})`);
   showSkillResult(label, true, 'Drafting email with Claude AI…');
   try {
     const body = JSON.stringify({ summaryId: selectedSummaryId(), tone });
     const res = await fetch('/api/skills/generate-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSkillResult(label, false, `Subject: ${data.email.subject}\n\n${data.email.plainText}\n\n---\nSaved: ${data.txtPath}`);
+  } catch (err) {
+    showSkillResult(label, false, `Error: ${err.message}`);
+  }
+});
+
+// ── Skill: Thank You Email ─────────────────────────────────────────────────────
+$('skill-thankyou').addEventListener('click', async () => {
+  const tone = getGroupTone('thankyou');
+  const label = skillLabel(`Thank You Email (${tone})`);
+  showSkillResult(label, true, 'Drafting thank-you email with Claude AI…');
+  try {
+    const body = JSON.stringify({ summaryId: selectedSummaryId(), tone });
+    const res = await fetch('/api/skills/thank-you-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showSkillResult(label, false, `Subject: ${data.email.subject}\n\n${data.email.plainText}\n\n---\nSaved: ${data.txtPath}`);

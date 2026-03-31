@@ -232,6 +232,30 @@ app.post('/api/skills/generate-email', async (req, res) => {
   }
 });
 
+// ─── POST /api/skills/thank-you-email ────────────────────────────────────────
+app.post('/api/skills/thank-you-email', async (req, res) => {
+  const { summaryId, tone = 'formal' } = req.body;
+  let summary;
+  if (summaryId) {
+    const found = getAllSummaries().find(s => s.id === summaryId);
+    summary = found?.data || null;
+  } else {
+    summary = getLatestSummary();
+  }
+  if (!summary) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+  try {
+    const skill = new EmailSkill();
+    const email = await skill.generateEmail(summary, { tone, emailType: 'thank-you' });
+    const { htmlPath, txtPath } = skill.saveEmail(email, 'thankyou-email');
+    res.json({ email, htmlPath, txtPath, title: summary.title });
+  } catch (err) {
+    console.error('[thank-you-email]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── POST /api/skills/meeting-stats ──────────────────────────────────────────
 app.post('/api/skills/meeting-stats', (req, res) => {
   const summaries = getAllSummaries();
