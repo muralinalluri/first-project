@@ -113,6 +113,18 @@ app.post('/api/email', async (req, res) => {
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+const EXCLUDED_TITLES = new Set([
+  'unknown meeting',
+  'untitled meeting',
+  'unknown / incomplete meeting',
+  'unknown/incomplete meeting',
+]);
+
+function isValidMeeting(data) {
+  const title = (data?.title || '').trim().toLowerCase();
+  return title !== '' && !EXCLUDED_TITLES.has(title);
+}
+
 function getAllSummaries() {
   if (!existsSync('outputs')) return [];
   return readdirSync('outputs')
@@ -122,7 +134,7 @@ function getAllSummaries() {
       try { return { id: f.replace('.json', ''), data: JSON.parse(readFileSync(join('outputs', f), 'utf-8')) }; }
       catch { return null; }
     })
-    .filter(Boolean);
+    .filter(entry => entry && isValidMeeting(entry.data));
 }
 
 function getLatestSummary() {
