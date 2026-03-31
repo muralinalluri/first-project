@@ -245,25 +245,26 @@
     </div>
 
     <div class="page-content">
+
+      <!-- Meeting selection context — full width above columns -->
+      <div class="skills-context-box">
+        <div id="skill-meeting-indicator" class="skill-meeting-indicator hidden">
+          <div class="skill-meeting-indicator-inner">
+            <span class="skill-context-label">Running skills for</span>
+            <span id="skill-meeting-name" class="skill-meeting-name"></span>
+          </div>
+          <button id="btn-clear-selection" class="btn-clear-selection" title="Clear selection">✕</button>
+        </div>
+        <div id="skill-no-selection" class="skill-no-selection">
+          <span class="skill-no-selection-icon">←</span>
+          Select a meeting to target a specific one, or skills run on the latest.
+        </div>
+      </div>
+
       <div class="meetings-layout">
 
         <!-- Left: Skills -->
         <div class="meetings-sidebar">
-
-          <!-- Meeting selection indicator -->
-          <div class="skills-context-box">
-            <div id="skill-meeting-indicator" class="skill-meeting-indicator hidden">
-              <div class="skill-meeting-indicator-inner">
-                <span class="skill-context-label">Running skills for</span>
-                <span id="skill-meeting-name" class="skill-meeting-name"></span>
-              </div>
-              <button id="btn-clear-selection" class="btn-clear-selection" title="Clear selection">✕</button>
-            </div>
-            <div id="skill-no-selection" class="skill-no-selection">
-              <span class="skill-no-selection-icon">←</span>
-              Select a meeting to target a specific one, or skills run on the latest.
-            </div>
-          </div>
 
           <!-- Skill cards -->
           <div class="page-section-title">Skills</div>
