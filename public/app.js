@@ -93,7 +93,8 @@ function drawVisualizer() {
     const data = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(data);
 
-    ctx.fillStyle = '#003087';
+    // Dark background so bars always stand out
+    ctx.fillStyle = '#070E1C';
     ctx.fillRect(0, 0, W, H);
 
     const bars = 60;
@@ -101,13 +102,13 @@ function drawVisualizer() {
     for (let i = 0; i < bars; i++) {
       const idx = Math.floor(i * data.length / bars);
       const v = data[idx] / 255;
-      const h = v * H * 0.9;
-      const alpha = 0.5 + v * 0.5;
-      // Gradient from blue to gold based on intensity
-      const r = Math.round(0 + v * 181);
-      const g = Math.round(94 + v * 52);
-      const b = Math.round(184 * (1 - v * 0.7));
-      ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+      // Minimum bar height so the visualizer is always visible
+      const h = Math.max(4, v * H * 0.88);
+      // Low intensity → bright blue; high intensity → gold
+      const r = Math.round(30  + v * 225);
+      const g = Math.round(130 + v * 16);
+      const b = Math.round(220 * (1 - v * 0.85));
+      ctx.fillStyle = `rgba(${r},${g},${b},0.9)`;
       ctx.beginPath();
       ctx.roundRect(i * barW + 1, (H - h) / 2, barW - 2, h, 2);
       ctx.fill();
