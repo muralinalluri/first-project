@@ -93,8 +93,8 @@ function drawVisualizer() {
     const data = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(data);
 
-    // Dark background so bars always stand out
-    ctx.fillStyle = '#070E1C';
+    // Deep navy background matching app palette
+    ctx.fillStyle = '#001C55';
     ctx.fillRect(0, 0, W, H);
 
     const bars = 60;

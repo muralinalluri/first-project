@@ -274,10 +274,10 @@ main {
 
 .visualizer-wrap {
   width: 100%;
-  background: #070E1C;
+  background: #001C55;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid rgba(0,94,184,.25);
+  border: 1px solid rgba(0,94,184,.3);
 }
 canvas#visualizer { display: block; width: 100%; height: 80px; }
 
