@@ -16,6 +16,7 @@ import { Summarizer } from './src/summarizer.js';
 import { EmailSkill } from './src/email-skill.js';
 import { AgendaSkill } from './src/agenda-skill.js';
 import { InsightsSkill } from './src/insights-skill.js';
+import { SentimentSkill } from './src/sentiment-skill.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -315,6 +316,29 @@ app.post('/api/skills/meeting-stats', (req, res) => {
   ].filter(l => l !== undefined).join('\n');
 
   res.json({ report, totalMeetings: total, sentiment, totalActionItems });
+});
+
+// ─── POST /api/skills/sentiment-analysis ─────────────────────────────────────
+app.post('/api/skills/sentiment-analysis', async (req, res) => {
+  const { summaryId } = req.body;
+  let summary;
+  if (summaryId) {
+    const found = getAllSummaries().find(s => s.id === summaryId);
+    summary = found?.data || null;
+  } else {
+    summary = getLatestSummary();
+  }
+  if (!summary) {
+    return res.status(404).json({ error: 'No summaries found. Record and summarize a meeting first.' });
+  }
+  try {
+    const skill = new SentimentSkill();
+    const analysis = await skill.analyze(summary);
+    res.json({ analysis, title: summary.title });
+  } catch (err) {
+    console.error('[sentiment-analysis]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── POST /api/insights ───────────────────────────────────────────────────────

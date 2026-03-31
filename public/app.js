@@ -931,6 +931,51 @@ function hexToRgba(hex, opacity) {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
+// ── Skill: Sentiment Analysis ─────────────────────────────────────────────────
+$('skill-sentiment').addEventListener('click', async () => {
+  const label = skillLabel('Sentiment Analysis');
+  showSkillResult(label, true, 'Analysing emotional tone with Claude AI…');
+  try {
+    const body = JSON.stringify({ summaryId: selectedSummaryId() });
+    const res = await fetch('/api/skills/sentiment-analysis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    const a = data.analysis;
+    const scoreBar = '█'.repeat(Math.round((a.sentimentScore + 1) * 5)) + '░'.repeat(10 - Math.round((a.sentimentScore + 1) * 5));
+    const result = [
+      `📊 SENTIMENT ANALYSIS — ${data.title}`,
+      ``,
+      `Overall Sentiment : ${a.overallSentiment?.toUpperCase()}  (score: ${a.sentimentScore?.toFixed(2)})`,
+      `Confidence        : ${a.confidence}`,
+      `Emotional Tone    : ${a.emotionalTone}`,
+      `Score             : [${scoreBar}]`,
+      ``,
+      `── Breakdown ──────────────────────────`,
+      `  Positive : ${a.breakdown?.positive ?? 0}%`,
+      `  Neutral  : ${a.breakdown?.neutral  ?? 0}%`,
+      `  Negative : ${a.breakdown?.negative ?? 0}%`,
+      ``,
+      `── Highlights ─────────────────────────`,
+      `Positive signals:`,
+      ...(a.highlights?.positive || []).map(h => `  ✓ ${h}`),
+      `Concerns:`,
+      ...(a.highlights?.concerns || []).map(c => `  ⚠ ${c}`),
+      ``,
+      `── Topic Sentiments ───────────────────`,
+      ...(a.topicSentiments || []).map(t => `  ${t.topic}: ${t.sentiment} — ${t.note}`),
+      ``,
+      `── Team Dynamics ──────────────────────`,
+      a.teamDynamics,
+      ``,
+      `── Recommendations ────────────────────`,
+      ...(a.recommendations || []).map((r, i) => `  ${i + 1}. ${r}`),
+    ].join('\n');
+    showSkillResult(label, false, result);
+  } catch (err) {
+    showSkillResult(label, false, `Error: ${err.message}`);
+  }
+});
+
 // ── Skill: Meeting Stats ──────────────────────────────────────────────────────
 $('skill-stats').addEventListener('click', async () => {
   showSkillResult('Meeting Stats — All Meetings', true, 'Analyzing meetings…');
