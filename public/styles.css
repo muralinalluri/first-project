@@ -763,6 +763,23 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   font-style: italic;
 }
 
+/* ── Skills select prompt ────────────────────────────────────────────────── */
+.skills-select-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: .84rem;
+  line-height: 1.6;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg3);
+}
+.skills-select-icon { font-size: 1.6rem; }
+
 /* ── Skill cards ─────────────────────────────────────────────────────────── */
 .skill-cards { display: flex; flex-direction: column; gap: .5rem; }
 

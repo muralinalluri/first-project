@@ -541,6 +541,8 @@ function clearMeetingSelection() {
   document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
   hide($('skill-meeting-indicator'));
   show($('skill-no-selection'));
+  hide($('skills-section'));
+  show($('skills-select-prompt'));
 }
 
 function selectMeeting(index) {
@@ -551,6 +553,8 @@ function selectMeeting(index) {
   $('skill-meeting-name').textContent = meetingsData[index].title;
   show($('skill-meeting-indicator'));
   hide($('skill-no-selection'));
+  show($('skills-section'));
+  hide($('skills-select-prompt'));
 }
 
 // ── Load meetings list ────────────────────────────────────────────────────────
@@ -561,6 +565,8 @@ async function loadMeetings() {
   selectedMeetingIndex = null;
   hide($('skill-meeting-indicator'));
   show($('skill-no-selection'));
+  hide($('skills-section'));
+  show($('skills-select-prompt'));
 
   try {
     const res = await fetch('/api/meetings');

@@ -20,7 +20,7 @@
       </div>
       <nav class="header-nav">
         <button class="nav-btn active" data-page="workflow">🎙 Assistant</button>
-        <button class="nav-btn" data-page="meetings">📋 Meetings</button>
+        <button class="nav-btn" data-page="meetings">📋 My Activities</button>
         <button class="nav-btn" data-page="insights">💡 Insights</button>
       </nav>
       <div id="api-status" class="api-status checking">Checking API…</div>
@@ -238,8 +238,8 @@
     <div class="page-header">
       <div class="page-header-inner">
         <div>
-          <h2 class="page-title">📋 Meetings</h2>
-          <p class="page-subtitle">Browse past meetings and run AI-powered skills</p>
+          <h2 class="page-title">📋 My Activities</h2>
+          <p class="page-subtitle">Select a meeting to run AI-powered skills</p>
         </div>
       </div>
     </div>
@@ -266,7 +266,14 @@
         <!-- Left: Skills -->
         <div class="meetings-sidebar">
 
-          <!-- Skill cards -->
+          <!-- Prompt shown when no meeting is selected -->
+          <div id="skills-select-prompt" class="skills-select-prompt">
+            <div class="skills-select-icon">👈</div>
+            <p>Select a meeting from the list<br>to run skills on it</p>
+          </div>
+
+          <!-- Skill cards — hidden until a meeting is selected -->
+          <div id="skills-section" class="hidden">
           <div class="page-section-title">Skills</div>
           <div class="skill-cards">
 
@@ -359,6 +366,7 @@
             </div>
 
           </div>
+          </div><!-- end #skills-section -->
 
         </div>
 
