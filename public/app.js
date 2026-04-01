@@ -521,7 +521,7 @@ function showPage(name) {
   if (page) { page.classList.add('active'); window.scrollTo({ top: 0 }); }
 
   if (name === 'meetings') loadMeetings();
-if (name === 'insights') {
+  if (name === 'insights') {
     const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
     if (activeInsightsSubtab === 'keywords') loadInsights(range);
     else loadCompetitors(range);
@@ -825,7 +825,6 @@ function renderInsights(data) {
 
   renderWordCloud(data.keywords);
   renderBarChart(data.keywords);
-  renderHeatmap(data.heatmapData, data.meetingTitles);
   show($('insights-content'));
 }
 
