@@ -17,14 +17,13 @@ import { EmailSkill } from './src/email-skill.js';
 import { AgendaSkill } from './src/agenda-skill.js';
 import { InsightsSkill } from './src/insights-skill.js';
 import { SentimentSkill } from './src/sentiment-skill.js';
-import { registerClientRoutes } from './src/client-routes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── Directories ──────────────────────────────────────────────────────────────
-['recordings', 'outputs', 'clients'].forEach(dir => {
+['recordings', 'outputs'].forEach(dir => {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 });
 
@@ -383,9 +382,6 @@ app.post('/api/insights', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// ─── Client CRM Routes ────────────────────────────────────────────────────────
-registerClientRoutes(app, getAllSummaries);
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {

@@ -21,8 +21,7 @@
       <nav class="header-nav">
         <button class="nav-btn active" data-page="workflow">🎙 Assistant</button>
         <button class="nav-btn" data-page="meetings">📋 My Activities</button>
-        <button class="nav-btn" data-page="clients">👥 Clients</button>
-        <button class="nav-btn" data-page="insights">💡 Insights</button>
+<button class="nav-btn" data-page="insights">💡 Insights</button>
       </nav>
       <div id="api-status" class="api-status checking">Checking API…</div>
     </div>
@@ -340,122 +339,6 @@
       </div><!-- end .activities-layout -->
     </div><!-- end .page-content -->
   </div><!-- end #page-meetings -->
-
-  <!-- ════════════════════════════════════════════════════════════
-       PAGE: CLIENTS
-  ═══════════════════════════════════════════════════════════════ -->
-  <div id="page-clients" class="page">
-    <div class="page-header">
-      <div class="page-header-inner">
-        <div>
-          <h2 class="page-title">👥 Clients</h2>
-          <p class="page-subtitle">Manage client profiles and generate pre-meeting briefs</p>
-        </div>
-        <button id="btn-add-client" class="btn-primary btn-sm">+ Add Client</button>
-      </div>
-    </div>
-
-    <div class="page-content">
-      <div id="clients-empty" class="empty-state hidden">
-        <div class="empty-icon">👥</div>
-        <p>No clients yet. Click <strong>+ Add Client</strong> to get started.</p>
-      </div>
-      <div id="clients-list" class="clients-list"></div>
-    </div>
-  </div>
-
-  <!-- ── Client Form Modal ── -->
-  <div id="client-modal" class="modal-overlay hidden">
-    <div class="modal-box modal-box-wide">
-      <div class="modal-header">
-        <span id="client-modal-title" class="modal-title">Add Client</span>
-        <button id="btn-close-client-modal" class="btn-close-modal">✕</button>
-      </div>
-      <div class="modal-body">
-        <form id="client-form" class="client-form">
-          <input type="hidden" id="client-id" />
-          <div class="form-grid">
-            <div class="form-group required">
-              <label for="client-name">Full Name</label>
-              <input id="client-name" type="text" placeholder="Jane Smith" class="form-input" required />
-            </div>
-            <div class="form-group">
-              <label for="client-company">Company / Fund</label>
-              <input id="client-company" type="text" placeholder="Acme Capital Partners" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label for="client-email">Email</label>
-              <input id="client-email" type="email" placeholder="jane@example.com" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label for="client-phone">Phone</label>
-              <input id="client-phone" type="text" placeholder="+1 555 000 0000" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label for="client-aum">AUM Tier</label>
-              <select id="client-aum" class="form-input form-select">
-                <option value="ultra-high-net-worth">Ultra High Net Worth (100M+)</option>
-                <option value="high-net-worth" selected>High Net Worth (1M–100M)</option>
-                <option value="mass-affluent">Mass Affluent (100K–1M)</option>
-                <option value="institutional">Institutional</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="client-risk">Risk Profile</label>
-              <select id="client-risk" class="form-input form-select">
-                <option value="conservative">Conservative</option>
-                <option value="moderate" selected>Moderate</option>
-                <option value="aggressive">Aggressive</option>
-                <option value="very-aggressive">Very Aggressive</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="client-stage">Relationship Stage</label>
-              <select id="client-stage" class="form-input form-select">
-                <option value="prospect" selected>Prospect</option>
-                <option value="onboarding">Onboarding</option>
-                <option value="active">Active Client</option>
-                <option value="at-risk">At Risk</option>
-                <option value="dormant">Dormant</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="client-interests">Product Interests <span class="form-hint">(comma-separated)</span></label>
-              <input id="client-interests" type="text" placeholder="Equities, Fixed Income, Alternatives" class="form-input" />
-            </div>
-          </div>
-          <div class="form-group form-group-full">
-            <label for="client-notes">Advisor Notes</label>
-            <textarea id="client-notes" class="form-input" rows="3" placeholder="Key observations, preferences, sensitivities…"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" id="btn-cancel-client" class="btn-ghost">Cancel</button>
-            <button type="submit" class="btn-primary" id="btn-save-client">Save Client</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Client Brief Modal ── -->
-  <div id="brief-modal" class="modal-overlay hidden">
-    <div class="modal-box modal-box-wide">
-      <div class="modal-header">
-        <span id="brief-modal-title" class="modal-title">Pre-Meeting Brief</span>
-        <div class="modal-header-actions">
-          <button id="btn-copy-brief" class="modal-copy-btn hidden">Copy</button>
-          <button id="btn-close-brief-modal" class="btn-close-modal">✕</button>
-        </div>
-      </div>
-      <div class="modal-body">
-        <div id="brief-loading" class="skill-modal-loading hidden">
-          <div class="spinner"></div>
-          <p>Generating pre-meeting brief with Claude AI…</p>
-        </div>
-        <div id="brief-content" class="brief-content hidden"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- ════════════════════════════════════════════════════════════
        PAGE: INSIGHTS
