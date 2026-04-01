@@ -539,22 +539,31 @@ $('btn-clear-selection').addEventListener('click', clearMeetingSelection);
 function clearMeetingSelection() {
   selectedMeetingIndex = null;
   document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
-  hide($('skill-meeting-indicator'));
-  show($('skill-no-selection'));
-  hide($('skills-section'));
-  show($('skills-select-prompt'));
+  // Detach drawer back to body (hidden)
+  const drawer = $('skills-drawer');
+  drawer.classList.remove('open');
+  document.body.appendChild(drawer);
 }
 
 function selectMeeting(index) {
+  const cards = document.querySelectorAll('.meeting-card');
+
+  // If clicking already-selected card, collapse it
+  if (selectedMeetingIndex === index) {
+    clearMeetingSelection();
+    return;
+  }
+
   selectedMeetingIndex = index;
-  document.querySelectorAll('.meeting-card').forEach((c, i) => {
-    c.classList.toggle('selected', i === index);
-  });
+  cards.forEach((c, i) => c.classList.toggle('selected', i === index));
   $('skill-meeting-name').textContent = meetingsData[index].title;
-  show($('skill-meeting-indicator'));
-  hide($('skill-no-selection'));
-  show($('skills-section'));
-  hide($('skills-select-prompt'));
+
+  // Insert drawer immediately after the selected card and animate open
+  const drawer = $('skills-drawer');
+  drawer.classList.remove('open');
+  cards[index].after(drawer);
+  // Trigger animation on next frame
+  requestAnimationFrame(() => drawer.classList.add('open'));
 }
 
 // ── Load meetings list ────────────────────────────────────────────────────────
@@ -563,10 +572,9 @@ async function loadMeetings() {
   // Clear previous cards (keep the empty message element)
   Array.from(list.children).forEach(c => { if (c.id !== 'meetings-empty') c.remove(); });
   selectedMeetingIndex = null;
-  hide($('skill-meeting-indicator'));
-  show($('skill-no-selection'));
-  hide($('skills-section'));
-  show($('skills-select-prompt'));
+  const drawer = $('skills-drawer');
+  drawer.classList.remove('open');
+  document.body.appendChild(drawer);
 
   try {
     const res = await fetch('/api/meetings');

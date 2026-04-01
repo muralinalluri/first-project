@@ -239,145 +239,118 @@
       <div class="page-header-inner">
         <div>
           <h2 class="page-title">📋 My Activities</h2>
-          <p class="page-subtitle">Select a meeting to run AI-powered skills</p>
+          <p class="page-subtitle">Click a meeting to expand AI-powered skills</p>
         </div>
       </div>
     </div>
 
     <div class="page-content">
-
-      <!-- Meeting selection context — full width above columns -->
-      <div class="skills-context-box">
-        <div id="skill-meeting-indicator" class="skill-meeting-indicator hidden">
-          <div class="skill-meeting-indicator-inner">
-            <span class="skill-context-label">Running skills for</span>
-            <span id="skill-meeting-name" class="skill-meeting-name"></span>
-          </div>
-          <button id="btn-clear-selection" class="btn-clear-selection" title="Clear selection">✕</button>
-        </div>
-        <div id="skill-no-selection" class="skill-no-selection">
-          <span class="skill-no-selection-icon">←</span>
-          Select a meeting to target a specific one, or skills run on the latest.
+      <div class="activities-container">
+        <div id="meetings-list" class="meetings-list">
+          <div id="meetings-empty" class="meetings-empty hidden">No meetings saved yet. Complete a meeting through the app first.</div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="meetings-layout">
+  <!-- Skills drawer — shared, injected after selected meeting card via JS -->
+  <div id="skills-drawer" class="skills-drawer">
+    <div class="skills-drawer-inner">
+      <div class="skills-drawer-header">
+        <div class="skills-drawer-for">
+          <span class="skills-drawer-label">Skills for</span>
+          <span id="skill-meeting-name" class="skills-drawer-meeting"></span>
+        </div>
+        <button id="btn-clear-selection" class="btn-close-drawer">✕ Close</button>
+      </div>
+      <div class="skill-cards">
 
-        <!-- Left: Skills -->
-        <div class="meetings-sidebar">
-
-          <!-- Prompt shown when no meeting is selected -->
-          <div id="skills-select-prompt" class="skills-select-prompt">
-            <div class="skills-select-icon">👈</div>
-            <p>Select a meeting from the list<br>to run skills on it</p>
+        <div class="skill-card skill-card-email">
+          <div class="skill-card-top-row">
+            <div class="skill-card-left">
+              <div class="skill-card-icon">🙏</div>
+              <div>
+                <div class="skill-card-title">Thank You Email</div>
+                <div class="skill-card-desc">Send a warm thank-you acknowledging contributions &amp; outcomes</div>
+              </div>
+            </div>
+            <button class="skill-card-run" id="skill-thankyou">Run</button>
           </div>
-
-          <!-- Skill cards — hidden until a meeting is selected -->
-          <div id="skills-section" class="hidden">
-          <div class="page-section-title">Skills</div>
-          <div class="skill-cards">
-
-            <div class="skill-card skill-card-email">
-              <div class="skill-card-top-row">
-                <div class="skill-card-left">
-                  <div class="skill-card-icon">🙏</div>
-                  <div>
-                    <div class="skill-card-title">Thank You Email</div>
-                    <div class="skill-card-desc">Send a warm thank-you acknowledging contributions &amp; outcomes</div>
-                  </div>
-                </div>
-                <button class="skill-card-run" id="skill-thankyou">Run</button>
-              </div>
-              <div class="skill-card-tone">
-                <span class="skill-tone-label">Tone:</span>
-                <div class="email-tone-buttons">
-                  <button class="btn-tone-mini active" data-tone="formal" data-group="thankyou">Formal</button>
-                  <button class="btn-tone-mini" data-tone="friendly" data-group="thankyou">Friendly</button>
-                  <button class="btn-tone-mini" data-tone="concise" data-group="thankyou">Concise</button>
-                  <button class="btn-tone-mini" data-tone="detailed" data-group="thankyou">Detailed</button>
-                </div>
-              </div>
+          <div class="skill-card-tone">
+            <span class="skill-tone-label">Tone:</span>
+            <div class="email-tone-buttons">
+              <button class="btn-tone-mini active" data-tone="formal" data-group="thankyou">Formal</button>
+              <button class="btn-tone-mini" data-tone="friendly" data-group="thankyou">Friendly</button>
+              <button class="btn-tone-mini" data-tone="concise" data-group="thankyou">Concise</button>
+              <button class="btn-tone-mini" data-tone="detailed" data-group="thankyou">Detailed</button>
             </div>
-
-            <div class="skill-card skill-card-email">
-              <div class="skill-card-top-row">
-                <div class="skill-card-left">
-                  <div class="skill-card-icon">✉️</div>
-                  <div>
-                    <div class="skill-card-title">Follow-up Email</div>
-                    <div class="skill-card-desc">Draft a follow-up email with decisions &amp; action items</div>
-                  </div>
-                </div>
-                <button class="skill-card-run" id="skill-email">Run</button>
-              </div>
-              <div class="skill-card-tone">
-                <span class="skill-tone-label">Tone:</span>
-                <div class="email-tone-buttons">
-                  <button class="btn-tone-mini active" data-tone="formal" data-group="followup">Formal</button>
-                  <button class="btn-tone-mini" data-tone="friendly" data-group="followup">Friendly</button>
-                  <button class="btn-tone-mini" data-tone="concise" data-group="followup">Concise</button>
-                  <button class="btn-tone-mini" data-tone="detailed" data-group="followup">Detailed</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="skill-card">
-              <div class="skill-card-left">
-                <div class="skill-card-icon">📅</div>
-                <div>
-                  <div class="skill-card-title">Create Agenda</div>
-                  <div class="skill-card-desc">Generate next meeting agenda from action items &amp; next steps</div>
-                </div>
-              </div>
-              <button class="skill-card-run" id="skill-agenda">Run</button>
-            </div>
-
-            <div class="skill-card">
-              <div class="skill-card-left">
-                <div class="skill-card-icon">✅</div>
-                <div>
-                  <div class="skill-card-title">Export Action Items</div>
-                  <div class="skill-card-desc">Format action items as Markdown table &amp; Slack message</div>
-                </div>
-              </div>
-              <button class="skill-card-run" id="skill-export">Run</button>
-            </div>
-
-            <div class="skill-card">
-              <div class="skill-card-left">
-                <div class="skill-card-icon">🧠</div>
-                <div>
-                  <div class="skill-card-title">Sentiment Analysis</div>
-                  <div class="skill-card-desc">Deep emotional tone &amp; team dynamics analysis for the selected meeting</div>
-                </div>
-              </div>
-              <button class="skill-card-run" id="skill-sentiment">Run</button>
-            </div>
-
-            <div class="skill-card">
-              <div class="skill-card-left">
-                <div class="skill-card-icon">📊</div>
-                <div>
-                  <div class="skill-card-title">Meeting Stats</div>
-                  <div class="skill-card-desc">Analyze trends, sentiment &amp; top attendees across all meetings</div>
-                </div>
-              </div>
-              <button class="skill-card-run" id="skill-stats">Run</button>
-            </div>
-
           </div>
-          </div><!-- end #skills-section -->
-
         </div>
 
-        <!-- Right: Past meetings -->
-        <div class="meetings-main">
-          <div class="page-section">
-            <div class="page-section-title">Past Meetings</div>
-            <div id="meetings-list" class="meetings-list">
-              <div id="meetings-empty" class="meetings-empty hidden">No meetings saved yet. Complete a meeting through the app first.</div>
+        <div class="skill-card skill-card-email">
+          <div class="skill-card-top-row">
+            <div class="skill-card-left">
+              <div class="skill-card-icon">✉️</div>
+              <div>
+                <div class="skill-card-title">Follow-up Email</div>
+                <div class="skill-card-desc">Draft a follow-up email with decisions &amp; action items</div>
+              </div>
+            </div>
+            <button class="skill-card-run" id="skill-email">Run</button>
+          </div>
+          <div class="skill-card-tone">
+            <span class="skill-tone-label">Tone:</span>
+            <div class="email-tone-buttons">
+              <button class="btn-tone-mini active" data-tone="formal" data-group="followup">Formal</button>
+              <button class="btn-tone-mini" data-tone="friendly" data-group="followup">Friendly</button>
+              <button class="btn-tone-mini" data-tone="concise" data-group="followup">Concise</button>
+              <button class="btn-tone-mini" data-tone="detailed" data-group="followup">Detailed</button>
             </div>
           </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-card-left">
+            <div class="skill-card-icon">📅</div>
+            <div>
+              <div class="skill-card-title">Create Agenda</div>
+              <div class="skill-card-desc">Generate next meeting agenda from action items &amp; next steps</div>
+            </div>
+          </div>
+          <button class="skill-card-run" id="skill-agenda">Run</button>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-card-left">
+            <div class="skill-card-icon">✅</div>
+            <div>
+              <div class="skill-card-title">Export Action Items</div>
+              <div class="skill-card-desc">Format action items as Markdown table &amp; Slack message</div>
+            </div>
+          </div>
+          <button class="skill-card-run" id="skill-export">Run</button>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-card-left">
+            <div class="skill-card-icon">🧠</div>
+            <div>
+              <div class="skill-card-title">Sentiment Analysis</div>
+              <div class="skill-card-desc">Deep emotional tone &amp; team dynamics analysis for this meeting</div>
+            </div>
+          </div>
+          <button class="skill-card-run" id="skill-sentiment">Run</button>
+        </div>
+
+        <div class="skill-card">
+          <div class="skill-card-left">
+            <div class="skill-card-icon">📊</div>
+            <div>
+              <div class="skill-card-title">Meeting Stats</div>
+              <div class="skill-card-desc">Analyze trends, sentiment &amp; top attendees across all meetings</div>
+            </div>
+          </div>
+          <button class="skill-card-run" id="skill-stats">Run</button>
         </div>
 
       </div>
