@@ -521,7 +521,11 @@ function showPage(name) {
   if (page) { page.classList.add('active'); window.scrollTo({ top: 0 }); }
 
   if (name === 'meetings') loadMeetings();
-if (name === 'insights') loadInsights(document.querySelector('.range-tab.active')?.dataset.range || 'all');
+if (name === 'insights') {
+    const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
+    if (activeInsightsSubtab === 'keywords') loadInsights(range);
+    else loadCompetitors(range);
+  }
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -739,14 +743,42 @@ const CATEGORY_COLORS = {
   other:      '#5A7399',
 };
 
-let insightsCache = {};  // keyed by range
+let insightsCache = {};      // keyed by range
+let competitorsCache = {};   // keyed by range
+let activeInsightsSubtab = 'keywords';
+
+// ── Sub-tab switching ─────────────────────────────────────────────────────────
+document.querySelectorAll('.insights-sub-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.insights-sub-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeInsightsSubtab = btn.dataset.subtab;
+
+    if (activeInsightsSubtab === 'keywords') {
+      show($('insights-keywords-pane'));
+      $('insights-competitors-pane').classList.add('hidden');
+      const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
+      loadInsights(range);
+    } else {
+      $('insights-keywords-pane').classList.add('hidden');
+      show($('insights-competitors-pane'));
+      const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
+      loadCompetitors(range);
+    }
+  });
+});
 
 document.querySelectorAll('.range-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     insightsCache = {};
-    loadInsights(btn.dataset.range);
+    competitorsCache = {};
+    if (activeInsightsSubtab === 'keywords') {
+      loadInsights(btn.dataset.range);
+    } else {
+      loadCompetitors(btn.dataset.range);
+    }
   });
 });
 
@@ -901,6 +933,100 @@ function hexToRgba(hex, opacity) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r},${g},${b},${opacity})`;
+}
+
+// ── Competitor Tracker ────────────────────────────────────────────────────────
+async function loadCompetitors(range) {
+  if (competitorsCache[range]) {
+    renderCompetitors(competitorsCache[range]);
+    return;
+  }
+
+  hide($('competitors-content'));
+  hide($('competitors-empty'));
+  show($('competitors-loading'));
+
+  try {
+    const res = await fetch('/api/insights/competitors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ range }),
+    });
+    const data = await res.json();
+    hide($('competitors-loading'));
+
+    if (!res.ok) {
+      $('competitors-empty-msg').textContent = data.error || 'No data available.';
+      show($('competitors-empty'));
+      return;
+    }
+
+    competitorsCache[range] = data;
+    renderCompetitors(data);
+  } catch (err) {
+    hide($('competitors-loading'));
+    $('competitors-empty-msg').textContent = 'Failed to load data. Is the server running?';
+    show($('competitors-empty'));
+  }
+}
+
+function renderCompetitors(data) {
+  hide($('competitors-loading'));
+  hide($('competitors-empty'));
+
+  const list = $('competitors-list');
+  list.innerHTML = '';
+
+  if (!data.competitors?.length) {
+    $('competitors-empty-msg').textContent = data.summary || 'No competitor mentions found.';
+    show($('competitors-empty'));
+    hide($('competitors-content'));
+    return;
+  }
+
+  $('competitors-summary-bar').innerHTML =
+    `<strong>${data.competitors.length} competitor${data.competitors.length !== 1 ? 's' : ''} identified</strong> across ${data.meetingCount} meeting${data.meetingCount !== 1 ? 's' : ''} · ${data.summary}`;
+
+  const toneIcon = { positive: '↑', neutral: '→', negative: '↓' };
+
+  data.competitors
+    .sort((a, b) => b.mentions - a.mentions)
+    .forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'competitor-card';
+
+      const meetingChips = (c.meetings || [])
+        .map(m => `<span class="competitor-meeting-chip">${esc(m)}</span>`)
+        .join('');
+
+      const contexts = (c.contexts || [])
+        .map(ctx => `<div class="competitor-context-item">${esc(ctx)}</div>`)
+        .join('');
+
+      const tone = (c.tone || 'neutral').toLowerCase();
+      const toneClass = `tone-${tone}`;
+
+      card.innerHTML = `
+        <div class="competitor-card-header">
+          <div class="competitor-rank">${i + 1}</div>
+          <div class="competitor-name">${esc(c.name)}</div>
+          <span class="competitor-category">${esc(c.category || 'other')}</span>
+          <div class="competitor-mention-count">${c.mentions} mention${c.mentions !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="competitor-card-body">
+          <div>
+            <span class="competitor-tone ${toneClass}">${toneIcon[tone] || '→'} ${esc(tone)}</span>
+            ${c.toneNote ? `<div class="competitor-tone-note">${esc(c.toneNote)}</div>` : ''}
+          </div>
+          ${meetingChips ? `<div class="competitor-meetings"><span class="competitor-meetings-label">Seen in:</span>${meetingChips}</div>` : ''}
+          ${contexts ? `<div class="competitor-contexts"><div class="competitor-contexts-label">Context</div>${contexts}</div>` : ''}
+        </div>
+      `;
+
+      list.appendChild(card);
+    });
+
+  show($('competitors-content'));
 }
 
 // ── Skill: Sentiment Analysis ─────────────────────────────────────────────────

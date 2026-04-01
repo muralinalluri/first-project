@@ -17,6 +17,7 @@ import { EmailSkill } from './src/email-skill.js';
 import { AgendaSkill } from './src/agenda-skill.js';
 import { InsightsSkill } from './src/insights-skill.js';
 import { SentimentSkill } from './src/sentiment-skill.js';
+import { CompetitorSkill } from './src/competitor-skill.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -379,6 +380,35 @@ app.post('/api/insights', async (req, res) => {
       meetingTitles: summaries.map(s => s.data.title || 'Untitled') });
   } catch (err) {
     console.error('[insights]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/insights/competitors ──────────────────────────────────────────
+app.post('/api/insights/competitors', async (req, res) => {
+  const { range = 'all' } = req.body;
+  let summaries = getAllSummaries();
+
+  if (range !== 'all') {
+    const days = { '7d': 7, '30d': 30, '90d': 90 }[range] || 30;
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    summaries = summaries.filter(({ id }) => {
+      const raw = id.replace('summary-', '');
+      const normalized = raw.replace(/T(\d{2})-(\d{2})-(\d{2})$/, 'T$1:$2:$3');
+      return new Date(normalized) >= cutoff;
+    });
+  }
+
+  if (!summaries.length) {
+    return res.status(404).json({ error: 'No meetings found for this time range.' });
+  }
+
+  try {
+    const skill = new CompetitorSkill();
+    const result = await skill.analyze(summaries, 'Nalluri&Co.');
+    res.json({ ...result, range, meetingCount: summaries.length });
+  } catch (err) {
+    console.error('[competitors]', err.message);
     res.status(500).json({ error: err.message });
   }
 });

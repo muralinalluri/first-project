@@ -1020,6 +1020,133 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 .btn-tone-mini:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
 
 /* ── Insights page ───────────────────────────────────────────────────────── */
+.insights-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
+
+.insights-sub-tabs { display: flex; gap: .3rem; }
+.insights-sub-tab {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text-muted);
+  padding: .4rem 1rem;
+  border-radius: 8px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.insights-sub-tab.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.insights-sub-tab:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+
+.insights-pane { display: block; }
+.insights-pane.hidden { display: none !important; }
+
+/* ── Competitor tracker ──────────────────────────────────────────────────── */
+.competitors-summary-bar {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: .9rem 1.25rem;
+  font-size: .88rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+.competitors-summary-bar strong { color: var(--gold-light, #d4b06a); }
+
+.competitors-list { display: flex; flex-direction: column; gap: .85rem; }
+
+.competitor-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.competitor-card-header {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+.competitor-rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.competitor-name { font-weight: 700; font-size: .95rem; color: var(--navy); flex: 1; }
+.competitor-category {
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: .15rem .55rem;
+  border-radius: 20px;
+}
+.competitor-mention-count {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.competitor-card-body { padding: .85rem 1.1rem; display: flex; flex-direction: column; gap: .65rem; }
+
+.competitor-tone {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: .2rem .65rem;
+  border-radius: 20px;
+  width: fit-content;
+}
+.tone-positive { background: rgba(13,122,78,.1);  color: #0D7A4E; border: 1px solid rgba(13,122,78,.25); }
+.tone-neutral  { background: var(--bg3);           color: var(--text-muted); border: 1px solid var(--border); }
+.tone-negative { background: rgba(194,65,12,.1);  color: #C2410C; border: 1px solid rgba(194,65,12,.25); }
+
+.competitor-tone-note { font-size: .8rem; color: var(--text-muted); font-style: italic; }
+
+.competitor-meetings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  align-items: center;
+}
+.competitor-meetings-label { font-size: .72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.competitor-meeting-chip {
+  font-size: .72rem;
+  background: rgba(0,48,135,.08);
+  color: var(--navy);
+  border: 1px solid rgba(0,48,135,.15);
+  padding: .12rem .5rem;
+  border-radius: 20px;
+}
+
+.competitor-contexts { display: flex; flex-direction: column; gap: .35rem; }
+.competitor-contexts-label { font-size: .72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+.competitor-context-item {
+  font-size: .82rem;
+  color: var(--text-dim);
+  padding: .45rem .7rem;
+  background: var(--bg3);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  line-height: 1.55;
+}
+
 .range-tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
 .range-tab {
   border: 1px solid var(--border);
