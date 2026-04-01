@@ -14,6 +14,7 @@ export const config = {
   // Output settings
   output: {
     dir: './outputs',
+    clientsDir: './clients',
   },
 
   // Models
