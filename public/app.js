@@ -540,10 +540,10 @@ function clearMeetingSelection() {
   selectedMeetingIndex = null;
   document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
   $('skills-panel').classList.remove('open');
+  document.querySelector('.activities-layout')?.classList.remove('has-selection');
 }
 
 function selectMeeting(index) {
-  // Toggle off if same card clicked again
   if (selectedMeetingIndex === index) {
     clearMeetingSelection();
     return;
@@ -552,6 +552,7 @@ function selectMeeting(index) {
   document.querySelectorAll('.meeting-card').forEach((c, i) => c.classList.toggle('selected', i === index));
   $('skill-meeting-name').textContent = meetingsData[index].title;
   $('skills-panel').classList.add('open');
+  document.querySelector('.activities-layout')?.classList.add('has-selection');
 }
 
 // ── Load meetings list ────────────────────────────────────────────────────────
@@ -561,6 +562,7 @@ async function loadMeetings() {
   Array.from(list.children).forEach(c => { if (c.id !== 'meetings-empty') c.remove(); });
   selectedMeetingIndex = null;
   $('skills-panel').classList.remove('open');
+  document.querySelector('.activities-layout')?.classList.remove('has-selection');
 
   try {
     const res = await fetch('/api/meetings');

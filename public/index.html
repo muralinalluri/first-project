@@ -245,15 +245,16 @@
     </div>
 
     <div class="page-content">
-      <div class="activities-container">
-        <div id="meetings-list" class="meetings-list">
-          <div id="meetings-empty" class="meetings-empty hidden">No meetings saved yet. Complete a meeting through the app first.</div>
-        </div>
-      </div>
-    </div>
-  </div>
+      <div class="activities-layout">
 
-  <!-- Skills panel — fixed right-side slide-in -->
+        <!-- Left: meeting cards -->
+        <div class="meetings-col">
+          <div id="meetings-list" class="meetings-list">
+            <div id="meetings-empty" class="meetings-empty hidden">No meetings saved yet. Complete a meeting through the app first.</div>
+          </div>
+        </div>
+
+        <!-- Right: skills panel (inline, slides in) -->
   <div id="skills-panel" class="skills-panel">
     <div class="skills-panel-header">
       <div>
@@ -333,7 +334,11 @@
       </div>
 
     </div>
-  </div>
+      </div><!-- end #skills-panel -->
+
+      </div><!-- end .activities-layout -->
+    </div><!-- end .page-content -->
+  </div><!-- end #page-meetings -->
 
   <!-- ════════════════════════════════════════════════════════════
        PAGE: INSIGHTS
