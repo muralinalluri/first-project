@@ -539,31 +539,19 @@ $('btn-clear-selection').addEventListener('click', clearMeetingSelection);
 function clearMeetingSelection() {
   selectedMeetingIndex = null;
   document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
-  // Detach drawer back to body (hidden)
-  const drawer = $('skills-drawer');
-  drawer.classList.remove('open');
-  document.body.appendChild(drawer);
+  $('skills-panel').classList.remove('open');
 }
 
 function selectMeeting(index) {
-  const cards = document.querySelectorAll('.meeting-card');
-
-  // If clicking already-selected card, collapse it
+  // Toggle off if same card clicked again
   if (selectedMeetingIndex === index) {
     clearMeetingSelection();
     return;
   }
-
   selectedMeetingIndex = index;
-  cards.forEach((c, i) => c.classList.toggle('selected', i === index));
+  document.querySelectorAll('.meeting-card').forEach((c, i) => c.classList.toggle('selected', i === index));
   $('skill-meeting-name').textContent = meetingsData[index].title;
-
-  // Insert drawer immediately after the selected card and animate open
-  const drawer = $('skills-drawer');
-  drawer.classList.remove('open');
-  cards[index].after(drawer);
-  // Trigger animation on next frame
-  requestAnimationFrame(() => drawer.classList.add('open'));
+  $('skills-panel').classList.add('open');
 }
 
 // ── Load meetings list ────────────────────────────────────────────────────────
@@ -572,9 +560,7 @@ async function loadMeetings() {
   // Clear previous cards (keep the empty message element)
   Array.from(list.children).forEach(c => { if (c.id !== 'meetings-empty') c.remove(); });
   selectedMeetingIndex = null;
-  const drawer = $('skills-drawer');
-  drawer.classList.remove('open');
-  document.body.appendChild(drawer);
+  $('skills-panel').classList.remove('open');
 
   try {
     const res = await fetch('/api/meetings');
@@ -693,47 +679,17 @@ function skillLabel(base) {
   return `${base} — Latest Meeting`;
 }
 
-// ── Skill: Create Agenda ──────────────────────────────────────────────────────
-$('skill-agenda').addEventListener('click', async () => {
-  const label = skillLabel('Create Agenda');
-  showSkillResult(label, true, 'Generating agenda with Claude AI…');
-  try {
-    const body = JSON.stringify({ summaryId: selectedSummaryId() });
-    const res = await fetch('/api/skills/create-agenda', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showSkillResult(label, false, data.agenda);
-  } catch (err) {
-    showSkillResult(label, false, `Error: ${err.message}`);
-  }
-});
-
-// ── Skill: Export Action Items ────────────────────────────────────────────────
-$('skill-export').addEventListener('click', async () => {
-  const label = skillLabel('Export Action Items');
-  showSkillResult(label, true, 'Collecting action items…');
-  try {
-    const body = JSON.stringify({ summaryId: selectedSummaryId() });
-    const res = await fetch('/api/skills/export-action-items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showSkillResult(label, false, `${data.count} action item${data.count !== 1 ? 's' : ''} found\n\n--- MARKDOWN ---\n${data.markdown}\n\n--- SLACK ---\n${data.slack}`);
-  } catch (err) {
-    showSkillResult(label, false, `Error: ${err.message}`);
-  }
-});
-
-// ── Skill: Email tone selectors (scoped by data-group) ────────────────────────
-document.querySelectorAll('.btn-tone-mini').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const group = btn.dataset.group;
-    document.querySelectorAll(`.btn-tone-mini[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
+// ── Skill: Tone chip selectors (scoped by data-group) ────────────────────────
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.tone-chip[data-group]');
+  if (!btn) return;
+  const group = btn.dataset.group;
+  document.querySelectorAll(`.tone-chip[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
 });
 
 function getGroupTone(group) {
-  return document.querySelector(`.btn-tone-mini.active[data-group="${group}"]`)?.dataset.tone || 'formal';
+  return document.querySelector(`.tone-chip.active[data-group="${group}"]`)?.dataset.tone || 'formal';
 }
 
 $('skill-email').addEventListener('click', async () => {
@@ -990,15 +946,3 @@ $('skill-sentiment').addEventListener('click', async () => {
   }
 });
 
-// ── Skill: Meeting Stats ──────────────────────────────────────────────────────
-$('skill-stats').addEventListener('click', async () => {
-  showSkillResult('Meeting Stats — All Meetings', true, 'Analyzing meetings…');
-  try {
-    const res = await fetch('/api/skills/meeting-stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    showSkillResult('Meeting Stats — All Meetings', false, data.report);
-  } catch (err) {
-    showSkillResult('Meeting Stats — All Meetings', false, `Error: ${err.message}`);
-  }
-});

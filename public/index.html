@@ -253,107 +253,85 @@
     </div>
   </div>
 
-  <!-- Skills drawer — shared, injected after selected meeting card via JS -->
-  <div id="skills-drawer" class="skills-drawer">
-    <div class="skills-drawer-inner">
-      <div class="skills-drawer-header">
-        <div class="skills-drawer-for">
-          <span class="skills-drawer-label">Skills for</span>
-          <span id="skill-meeting-name" class="skills-drawer-meeting"></span>
-        </div>
-        <button id="btn-clear-selection" class="btn-close-drawer">✕ Close</button>
+  <!-- Skills panel — fixed right-side slide-in -->
+  <div id="skills-panel" class="skills-panel">
+    <div class="skills-panel-header">
+      <div>
+        <div class="skills-panel-label">AI Skills</div>
+        <div id="skill-meeting-name" class="skills-panel-meeting"></div>
       </div>
-      <div class="skill-cards">
+      <button id="btn-clear-selection" class="skills-panel-close" title="Close">✕</button>
+    </div>
 
-        <div class="skill-card skill-card-email">
-          <div class="skill-card-top-row">
-            <div class="skill-card-left">
-              <div class="skill-card-icon">🙏</div>
-              <div>
-                <div class="skill-card-title">Thank You Email</div>
-                <div class="skill-card-desc">Send a warm thank-you acknowledging contributions &amp; outcomes</div>
-              </div>
-            </div>
-            <button class="skill-card-run" id="skill-thankyou">Run</button>
-          </div>
-          <div class="skill-card-tone">
-            <span class="skill-tone-label">Tone:</span>
-            <div class="email-tone-buttons">
-              <button class="btn-tone-mini active" data-tone="formal" data-group="thankyou">Formal</button>
-              <button class="btn-tone-mini" data-tone="friendly" data-group="thankyou">Friendly</button>
-              <button class="btn-tone-mini" data-tone="concise" data-group="thankyou">Concise</button>
-              <button class="btn-tone-mini" data-tone="detailed" data-group="thankyou">Detailed</button>
-            </div>
+    <div class="skills-panel-body">
+
+      <!-- Thank You Email -->
+      <div class="skill-item">
+        <div class="skill-item-header">
+          <span class="skill-item-icon">🙏</span>
+          <div class="skill-item-info">
+            <div class="skill-item-title">Thank You Email</div>
+            <div class="skill-item-desc">Warm thank-you acknowledging contributions &amp; outcomes</div>
           </div>
         </div>
-
-        <div class="skill-card skill-card-email">
-          <div class="skill-card-top-row">
-            <div class="skill-card-left">
-              <div class="skill-card-icon">✉️</div>
-              <div>
-                <div class="skill-card-title">Follow-up Email</div>
-                <div class="skill-card-desc">Draft a follow-up email with decisions &amp; action items</div>
-              </div>
-            </div>
-            <button class="skill-card-run" id="skill-email">Run</button>
-          </div>
-          <div class="skill-card-tone">
-            <span class="skill-tone-label">Tone:</span>
-            <div class="email-tone-buttons">
-              <button class="btn-tone-mini active" data-tone="formal" data-group="followup">Formal</button>
-              <button class="btn-tone-mini" data-tone="friendly" data-group="followup">Friendly</button>
-              <button class="btn-tone-mini" data-tone="concise" data-group="followup">Concise</button>
-              <button class="btn-tone-mini" data-tone="detailed" data-group="followup">Detailed</button>
-            </div>
+        <div class="skill-item-tone">
+          <span class="skill-tone-label">Tone</span>
+          <div class="tone-group">
+            <button class="tone-chip active" data-tone="formal"      data-group="thankyou">Formal</button>
+            <button class="tone-chip"        data-tone="friendly"    data-group="thankyou">Friendly</button>
+            <button class="tone-chip"        data-tone="concise"     data-group="thankyou">Concise</button>
+            <button class="tone-chip"        data-tone="detailed"    data-group="thankyou">Detailed</button>
           </div>
         </div>
-
-        <div class="skill-card">
-          <div class="skill-card-left">
-            <div class="skill-card-icon">📅</div>
-            <div>
-              <div class="skill-card-title">Create Agenda</div>
-              <div class="skill-card-desc">Generate next meeting agenda from action items &amp; next steps</div>
-            </div>
-          </div>
-          <button class="skill-card-run" id="skill-agenda">Run</button>
-        </div>
-
-        <div class="skill-card">
-          <div class="skill-card-left">
-            <div class="skill-card-icon">✅</div>
-            <div>
-              <div class="skill-card-title">Export Action Items</div>
-              <div class="skill-card-desc">Format action items as Markdown table &amp; Slack message</div>
-            </div>
-          </div>
-          <button class="skill-card-run" id="skill-export">Run</button>
-        </div>
-
-        <div class="skill-card">
-          <div class="skill-card-left">
-            <div class="skill-card-icon">🧠</div>
-            <div>
-              <div class="skill-card-title">Sentiment Analysis</div>
-              <div class="skill-card-desc">Deep emotional tone &amp; team dynamics analysis for this meeting</div>
-            </div>
-          </div>
-          <button class="skill-card-run" id="skill-sentiment">Run</button>
-        </div>
-
-        <div class="skill-card">
-          <div class="skill-card-left">
-            <div class="skill-card-icon">📊</div>
-            <div>
-              <div class="skill-card-title">Meeting Stats</div>
-              <div class="skill-card-desc">Analyze trends, sentiment &amp; top attendees across all meetings</div>
-            </div>
-          </div>
-          <button class="skill-card-run" id="skill-stats">Run</button>
-        </div>
-
+        <button class="skill-run-btn" id="skill-thankyou">
+          <span>Run</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
+
+      <div class="skill-divider"></div>
+
+      <!-- Follow-up Email -->
+      <div class="skill-item">
+        <div class="skill-item-header">
+          <span class="skill-item-icon">✉️</span>
+          <div class="skill-item-info">
+            <div class="skill-item-title">Follow-up Email</div>
+            <div class="skill-item-desc">Recap decisions &amp; action items for attendees</div>
+          </div>
+        </div>
+        <div class="skill-item-tone">
+          <span class="skill-tone-label">Tone</span>
+          <div class="tone-group">
+            <button class="tone-chip active" data-tone="formal"      data-group="followup">Formal</button>
+            <button class="tone-chip"        data-tone="friendly"    data-group="followup">Friendly</button>
+            <button class="tone-chip"        data-tone="concise"     data-group="followup">Concise</button>
+            <button class="tone-chip"        data-tone="detailed"    data-group="followup">Detailed</button>
+          </div>
+        </div>
+        <button class="skill-run-btn" id="skill-email">
+          <span>Run</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <div class="skill-divider"></div>
+
+      <!-- Sentiment Analysis -->
+      <div class="skill-item">
+        <div class="skill-item-header">
+          <span class="skill-item-icon">🧠</span>
+          <div class="skill-item-info">
+            <div class="skill-item-title">Sentiment Analysis</div>
+            <div class="skill-item-desc">Emotional tone, team dynamics &amp; recommendations</div>
+          </div>
+        </div>
+        <button class="skill-run-btn" id="skill-sentiment">
+          <span>Run</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
     </div>
   </div>
 
