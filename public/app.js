@@ -235,7 +235,8 @@ let liveAnalysisPending = false;
 let liveLastUpdated = null;
 
 function startLiveAdvisor() {
-  show($('live-advisor'));
+  $('live-advisor').classList.add('open');
+  document.body.classList.add('advisor-open');
   resetLiveAdvisorUI();
   show($('live-advisor-waiting'));
 
@@ -248,10 +249,10 @@ function stopLiveAdvisor() {
   clearInterval(liveAdvisorInterval);
   liveAdvisorInterval = null;
   liveAnalysisPending = false;
-  // Keep panel visible with last results after recording stops
+  // Grey out pulse dot, keep panel open with last results
   const pulse = document.querySelector('.live-pulse');
-  if (pulse) pulse.style.background = '#94a3b8';  // grey out the dot
-  $('live-refresh-btn') && ($('btn-live-refresh').disabled = true);
+  if (pulse) pulse.style.background = '#94a3b8';
+  if ($('btn-live-refresh')) $('btn-live-refresh').disabled = true;
 }
 
 function resetLiveAdvisorUI() {
@@ -652,6 +653,10 @@ function showPage(name) {
   const page = document.getElementById(`page-${name}`);
   if (page) { page.classList.add('active'); window.scrollTo({ top: 0 }); }
 
+  if (name !== 'workflow') {
+    $('live-advisor').classList.remove('open');
+    document.body.classList.remove('advisor-open');
+  }
   if (name === 'meetings') loadMeetings();
   if (name === 'insights') {
     const range = document.querySelector('.range-tab.active')?.dataset.range || 'all';
