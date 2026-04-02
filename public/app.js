@@ -154,6 +154,8 @@ async function startRecording() {
 
     mediaRecorder.start(100);
 
+    startLiveAdvisor();
+
     // Speech recognition for transcription
     speechTranscript = '';
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -199,6 +201,7 @@ function stopRecording() {
     mediaRecorder.stop();
   }
   if (recognition) { recognition.stop(); recognition = null; }
+  stopLiveAdvisor();
   clearInterval(timerInterval);
   $('timer').classList.remove('recording');
   $('btn-record').classList.remove('recording');
@@ -220,6 +223,135 @@ function showAudioPreview(url, name, duration) {
 
 $('btn-record').addEventListener('click', startRecording);
 $('btn-stop').addEventListener('click', stopRecording);
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LIVE ADVISOR
+════════════════════════════════════════════════════════════════════════════ */
+const LIVE_INTERVAL_MS = 45000;  // 45 seconds
+const MIN_WORDS_FOR_ANALYSIS = 20;
+
+let liveAdvisorInterval = null;
+let liveAnalysisPending = false;
+let liveLastUpdated = null;
+
+function startLiveAdvisor() {
+  show($('live-advisor'));
+  resetLiveAdvisorUI();
+  show($('live-advisor-waiting'));
+
+  // First analysis after 20s, then every 45s
+  liveAdvisorInterval = setInterval(runLiveAnalysis, LIVE_INTERVAL_MS);
+  setTimeout(runLiveAnalysis, 20000);
+}
+
+function stopLiveAdvisor() {
+  clearInterval(liveAdvisorInterval);
+  liveAdvisorInterval = null;
+  liveAnalysisPending = false;
+  // Keep panel visible with last results after recording stops
+  const pulse = document.querySelector('.live-pulse');
+  if (pulse) pulse.style.background = '#94a3b8';  // grey out the dot
+  $('live-refresh-btn') && ($('btn-live-refresh').disabled = true);
+}
+
+function resetLiveAdvisorUI() {
+  hide($('live-advisor-waiting'));
+  hide($('live-advisor-loading'));
+  hide($('live-advisor-content'));
+  hide($('live-alert-wrap'));
+  $('live-advisor-updated').textContent = '';
+}
+
+async function runLiveAnalysis() {
+  if (liveAnalysisPending) return;
+  const wordCount = speechTranscript.trim().split(/\s+/).filter(Boolean).length;
+
+  if (wordCount < MIN_WORDS_FOR_ANALYSIS) {
+    show($('live-advisor-waiting'));
+    hide($('live-advisor-loading'));
+    hide($('live-advisor-content'));
+    return;
+  }
+
+  liveAnalysisPending = true;
+  hide($('live-advisor-waiting'));
+  hide($('live-advisor-content'));
+  show($('live-advisor-loading'));
+  $('btn-live-refresh').disabled = true;
+
+  try {
+    const res = await fetch('/api/live-analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript: speechTranscript }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    renderLiveAnalysis(data);
+    liveLastUpdated = new Date();
+    $('live-advisor-updated').textContent = `Updated ${liveLastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+  } catch (err) {
+    $('live-advisor-updated').textContent = `Error: ${err.message}`;
+  } finally {
+    hide($('live-advisor-loading'));
+    show($('live-advisor-content'));
+    liveAnalysisPending = false;
+    if ($('btn-live-refresh')) $('btn-live-refresh').disabled = false;
+  }
+}
+
+function renderLiveAnalysis(data) {
+  // Sentiment badge
+  const sentiment = (data.sentiment || 'neutral').toLowerCase();
+  const sentimentLabels = { positive: '↑ Positive', negative: '↓ Negative', cautious: '~ Cautious', neutral: '→ Neutral' };
+  const badge = $('live-sentiment-badge');
+  badge.className = `live-sentiment-badge sentiment-${sentiment}`;
+  badge.textContent = `${sentimentLabels[sentiment] || sentiment} · Engagement: ${data.engagementLevel || 'medium'}`;
+  $('live-sentiment-signal').textContent = data.sentimentSignal || '';
+
+  // Advisor alert
+  if (data.advisorAlert) {
+    $('live-alert-text').textContent = data.advisorAlert;
+    show($('live-alert-wrap'));
+  } else {
+    hide($('live-alert-wrap'));
+  }
+
+  // Topics/signals chips
+  const topicsEl = $('live-topics');
+  topicsEl.innerHTML = '';
+  const signals = [...(data.clientSignals || []), ...(data.detectedTopics || [])];
+  const uniqueSignals = [...new Set(signals)].slice(0, 8);
+  uniqueSignals.forEach(t => {
+    const chip = document.createElement('span');
+    chip.className = 'live-topic-chip';
+    chip.textContent = t;
+    topicsEl.appendChild(chip);
+  });
+
+  // Product recommendations
+  const productsEl = $('live-products');
+  productsEl.innerHTML = '';
+  (data.recommendations || []).forEach(rec => {
+    const card = document.createElement('div');
+    card.className = 'live-product-card';
+    card.innerHTML = `
+      <div class="live-product-top">
+        <span class="live-product-name">${esc(rec.productName)}</span>
+        ${rec.ticker ? `<span class="live-product-ticker">${esc(rec.ticker)}</span>` : ''}
+        <span class="live-product-category">${esc(rec.category || '')}</span>
+      </div>
+      <div class="live-product-why">${esc(rec.whyNow || '')}</div>
+      ${rec.talkingPoint ? `<div class="live-product-talking">${esc(rec.talkingPoint)}</div>` : ''}
+    `;
+    productsEl.appendChild(card);
+  });
+
+  show($('live-advisor-content'));
+}
+
+$('btn-live-refresh').addEventListener('click', runLiveAnalysis);
 
 // File upload
 $('file-input').addEventListener('change', e => {

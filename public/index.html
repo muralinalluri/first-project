@@ -94,6 +94,59 @@
         <div class="panel-actions">
           <button id="btn-to-transcribe" class="btn-primary" disabled>Transcribe →</button>
         </div>
+
+        <!-- ── Live Advisor Panel ── -->
+        <div id="live-advisor" class="live-advisor hidden">
+          <div class="live-advisor-header">
+            <div class="live-advisor-title">
+              <span class="live-pulse"></span>
+              Live Advisor
+            </div>
+            <div class="live-advisor-meta">
+              <span id="live-advisor-updated" class="live-advisor-updated"></span>
+              <button id="btn-live-refresh" class="live-refresh-btn" title="Refresh now">↺ Refresh</button>
+            </div>
+          </div>
+
+          <div id="live-advisor-waiting" class="live-advisor-waiting hidden">
+            <div class="live-waiting-icon">🎙</div>
+            <p>Listening… keep talking. Analysis will appear after ~20 words.</p>
+          </div>
+
+          <div id="live-advisor-loading" class="live-advisor-loading hidden">
+            <div class="spinner spinner-sm"></div>
+            <span>Analysing conversation…</span>
+          </div>
+
+          <div id="live-advisor-content" class="hidden">
+
+            <!-- Sentiment row -->
+            <div class="live-section">
+              <div id="live-sentiment-badge" class="live-sentiment-badge"></div>
+              <div id="live-sentiment-signal" class="live-sentiment-signal"></div>
+            </div>
+
+            <!-- Advisor alert -->
+            <div id="live-alert-wrap" class="live-alert hidden">
+              <span class="live-alert-icon">⚠</span>
+              <span id="live-alert-text"></span>
+            </div>
+
+            <!-- Detected topics -->
+            <div class="live-section">
+              <div class="live-section-label">Client Signals</div>
+              <div id="live-topics" class="live-topics"></div>
+            </div>
+
+            <!-- Product recommendations -->
+            <div class="live-section">
+              <div class="live-section-label">Recommended Products</div>
+              <div id="live-products" class="live-products"></div>
+            </div>
+
+          </div>
+        </div>
+
       </section>
 
       <!-- PANEL 2 — TRANSCRIBE -->

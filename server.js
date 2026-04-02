@@ -18,6 +18,7 @@ import { AgendaSkill } from './src/agenda-skill.js';
 import { InsightsSkill } from './src/insights-skill.js';
 import { SentimentSkill } from './src/sentiment-skill.js';
 import { CompetitorSkill } from './src/competitor-skill.js';
+import { LiveAnalysisSkill } from './src/live-analysis-skill.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -380,6 +381,22 @@ app.post('/api/insights', async (req, res) => {
       meetingTitles: summaries.map(s => s.data.title || 'Untitled') });
   } catch (err) {
     console.error('[insights]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/live-analysis ─────────────────────────────────────────────────
+app.post('/api/live-analysis', async (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript?.trim()) {
+    return res.status(400).json({ error: 'transcript is required.' });
+  }
+  try {
+    const skill = new LiveAnalysisSkill();
+    const analysis = await skill.analyze(transcript);
+    res.json(analysis);
+  } catch (err) {
+    console.error('[live-analysis]', err.message);
     res.status(500).json({ error: err.message });
   }
 });
