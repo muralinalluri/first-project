@@ -19,6 +19,7 @@ import { InsightsSkill } from './src/insights-skill.js';
 import { SentimentSkill } from './src/sentiment-skill.js';
 import { CompetitorSkill } from './src/competitor-skill.js';
 import { LiveAnalysisSkill } from './src/live-analysis-skill.js';
+import { getProductsForPrompt, getProduct, generateFactSheetHtml } from './src/product-library.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -90,6 +91,14 @@ app.post('/api/summarize', async (req, res) => {
   }
 });
 
+// ─── GET /api/factsheet/:key ──────────────────────────────────────────────────
+app.get('/api/factsheet/:key', (req, res) => {
+  const html = generateFactSheetHtml(req.params.key);
+  if (!html) return res.status(404).send('Product not found');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
+
 // ─── POST /api/email ──────────────────────────────────────────────────────────
 app.post('/api/email', async (req, res) => {
   const { summary, tone, senderName, senderTitle, recipients } = req.body;
@@ -104,10 +113,16 @@ app.post('/api/email', async (req, res) => {
       senderName: senderName || 'Meeting Organizer',
       senderTitle: senderTitle || '',
       recipients: recipients ? recipients.split(',').map(r => r.trim()) : [],
+      availableProducts: getProductsForPrompt(),
     });
 
+    const attachments = (email.attachedProducts || [])
+      .map(key => getProduct(key))
+      .filter(Boolean)
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
+
     const { htmlPath, txtPath } = skill.saveEmail(email);
-    res.json({ email, htmlPath, txtPath });
+    res.json({ email, htmlPath, txtPath, attachments });
   } catch (err) {
     console.error('[email]', err.message);
     res.status(500).json({ error: err.message });
@@ -237,9 +252,12 @@ app.post('/api/skills/generate-email', async (req, res) => {
   }
   try {
     const skill = new EmailSkill();
-    const email = await skill.generateEmail(summary, { tone });
+    const email = await skill.generateEmail(summary, { tone, availableProducts: getProductsForPrompt() });
+    const attachments = (email.attachedProducts || [])
+      .map(key => getProduct(key)).filter(Boolean)
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
     const { htmlPath, txtPath } = skill.saveEmail(email);
-    res.json({ email, htmlPath, txtPath, title: summary.title });
+    res.json({ email, htmlPath, txtPath, title: summary.title, attachments });
   } catch (err) {
     console.error('[generate-email]', err.message);
     res.status(500).json({ error: err.message });
@@ -261,9 +279,12 @@ app.post('/api/skills/thank-you-email', async (req, res) => {
   }
   try {
     const skill = new EmailSkill();
-    const email = await skill.generateEmail(summary, { tone, emailType: 'thank-you' });
+    const email = await skill.generateEmail(summary, { tone, emailType: 'thank-you', availableProducts: getProductsForPrompt() });
+    const attachments = (email.attachedProducts || [])
+      .map(key => getProduct(key)).filter(Boolean)
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
     const { htmlPath, txtPath } = skill.saveEmail(email, 'thankyou-email');
-    res.json({ email, htmlPath, txtPath, title: summary.title });
+    res.json({ email, htmlPath, txtPath, title: summary.title, attachments });
   } catch (err) {
     console.error('[thank-you-email]', err.message);
     res.status(500).json({ error: err.message });

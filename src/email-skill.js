@@ -43,6 +43,7 @@ export class EmailSkill {
       senderTitle = '',
       recipients = [],
       emailType = 'follow-up',
+      availableProducts = [],
     } = options;
 
     const toneInstruction = EMAIL_TONE_PROMPTS[tone] || EMAIL_TONE_PROMPTS.formal;
@@ -55,8 +56,13 @@ export class EmailSkill {
 
     const isThankYou = emailType === 'thank-you';
 
-    const prompt = `You are a professional business communication expert.
-Generate a ${isThankYou ? 'thank-you' : 'follow-up'} email based on this meeting summary.
+    const productsSection = availableProducts.length
+      ? `\nAVAILABLE JPMorgan PRODUCTS — select the 2 most relevant based on meeting context:
+${availableProducts.map(p => `  [${p.key}] ${p.name}${p.ticker ? ` (${p.ticker})` : ''} — ${p.assetClass} — Risk: ${p.riskLevel}\n         Focus areas: ${p.focus}`).join('\n')}
+`
+      : '';
+
+    const prompt = `You are a senior relationship manager at J.P. Morgan Asset Management writing a ${isThankYou ? 'thank-you' : 'follow-up'} email to a client after a meeting.
 
 ${toneInstruction}
 
@@ -65,26 +71,29 @@ Sender: ${senderName}${senderTitle ? ` (${senderTitle})` : ''}
 
 Meeting Summary:
 ${summaryText}
-
-Generate a complete ${isThankYou ? 'thank-you' : 'follow-up'} email. Return a JSON object with this structure:
+${productsSection}
+Generate a complete ${isThankYou ? 'thank-you' : 'follow-up'} email. Return a JSON object with exactly this structure:
 {
   "subject": "Email subject line",
   "body": "Full email body in HTML format with proper paragraphs and lists",
-  "plainText": "Full email body in plain text format"
+  "plainText": "Full email body in plain text format",
+  "attachedProducts": ["KEY1", "KEY2"]
 }
 
 ${isThankYou ? `The thank-you email should:
 1. Open with sincere thanks for attendees' time and participation
 2. Highlight what was accomplished or decided in the meeting
-3. Briefly acknowledge each person's contribution if attendees are listed
-4. Express enthusiasm about the outcomes and next steps
-5. Close warmly and professionally` : `The email should:
+3. Acknowledge key topics discussed
+4. Express enthusiasm about next steps
+5. Close with a note that you are enclosing the two selected product materials for their reference
+6. Close warmly and professionally` : `The email should:
 1. Thank attendees for their time
 2. Recap the key discussion points briefly
-3. List decisions made
-4. Clearly state action items with owners and deadlines
-5. Outline next steps
-6. Include a professional closing`}
+3. List decisions made and action items with owners
+4. Note that you are enclosing the two selected product materials for their review prior to the next discussion
+5. Include a professional closing`}
+
+${availableProducts.length ? `For "attachedProducts": choose the 2 product keys (e.g. "JEPI", "JPST") that are MOST relevant to the meeting topics. Reference the enclosed materials naturally in the email body — e.g., "I have enclosed the [Product Name] fact sheet for your review."` : `For "attachedProducts": return an empty array [].`}
 
 Return only the JSON object, no other text.`;
 
@@ -112,7 +121,13 @@ Return only the JSON object, no other text.`;
         subject: `Follow-up: ${summary.title || 'Our Meeting'}`,
         body: `<p>${rawContent.replace(/\n/g, '</p><p>')}</p>`,
         plainText: rawContent,
+        attachedProducts: [],
       };
+    }
+
+    // Ensure attachedProducts is always an array
+    if (!Array.isArray(email.attachedProducts)) {
+      email.attachedProducts = [];
     }
 
     return email;

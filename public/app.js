@@ -587,7 +587,7 @@ $('btn-generate-email').addEventListener('click', async () => {
     if (!res.ok) throw new Error(data.error || 'Email generation failed');
 
     state.email = data.email;
-    renderEmail(data.email, data.htmlPath, data.txtPath);
+    renderEmail(data.email, data.htmlPath, data.txtPath, data.attachments);
     hide($('email-loading'));
     show($('email-content'));
 
@@ -599,7 +599,7 @@ $('btn-generate-email').addEventListener('click', async () => {
   }
 });
 
-function renderEmail(email, htmlPath, txtPath) {
+function renderEmail(email, htmlPath, txtPath, attachments) {
   $('email-subject').textContent = email.subject;
   $('email-body').innerHTML = email.body;
 
@@ -607,6 +607,33 @@ function renderEmail(email, htmlPath, txtPath) {
   $('link-email-html').href = '#';
   $('link-email-txt').textContent  = txtPath?.split('/').pop()  || 'email.txt';
   $('link-email-txt').href = '#';
+
+  renderAttachments($('email-attachments'), attachments);
+}
+
+function renderAttachments(container, attachments) {
+  if (!container) return;
+  if (!attachments?.length) { hide(container); return; }
+  container.innerHTML = `
+    <div class="email-attachments-label">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      Enclosed Materials
+    </div>
+    <div class="email-attachments-list">
+      ${attachments.map(a => `
+        <a class="attachment-chip" href="/api/factsheet/${a.key}" target="_blank" rel="noopener" title="Open Fact Sheet &amp; Fund Story in new tab">
+          <span class="attachment-chip-icon">📄</span>
+          <div class="attachment-chip-info">
+            <span class="attachment-chip-name">${esc(a.name)}</span>
+            <div class="attachment-chip-meta">
+              ${a.ticker ? `<span class="attachment-chip-ticker">${esc(a.ticker)}</span>` : ''}
+              <span class="attachment-chip-type">${esc(a.assetClass || a.category)}</span>
+            </div>
+          </div>
+          <span class="attachment-chip-action">Fact Sheet ↗</span>
+        </a>`).join('')}
+    </div>`;
+  show(container);
 }
 
 $('btn-copy-email').addEventListener('click', () => {
@@ -811,7 +838,7 @@ $('btn-copy-skill-modal').addEventListener('click', () => {
 });
 
 // ── Email-specific modal renderer ─────────────────────────────────────────────
-function showEmailResult(title, email, savedPath) {
+function showEmailResult(title, email, savedPath, attachments) {
   $('skill-modal-title').textContent = title;
   show($('skill-modal'));
   hide($('skill-modal-loading'));
@@ -819,6 +846,7 @@ function showEmailResult(title, email, savedPath) {
 
   $('skill-email-subject').textContent = email.subject || '';
   $('skill-email-body').innerHTML = email.body || `<p>${esc(email.plainText || '')}</p>`;
+  renderAttachments($('skill-modal-attachments'), attachments);
   show($('skill-modal-email'));
 
   // Store plain text for copy button
@@ -858,7 +886,7 @@ $('skill-email').addEventListener('click', async () => {
     const res = await fetch('/api/skills/generate-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showEmailResult(label, data.email, data.txtPath);
+    showEmailResult(label, data.email, data.txtPath, data.attachments);
   } catch (err) {
     showSkillResult(label, false, `Error: ${err.message}`);
   }
@@ -874,7 +902,7 @@ $('skill-thankyou').addEventListener('click', async () => {
     const res = await fetch('/api/skills/thank-you-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showEmailResult(label, data.email, data.txtPath);
+    showEmailResult(label, data.email, data.txtPath, data.attachments);
   } catch (err) {
     showSkillResult(label, false, `Error: ${err.message}`);
   }
