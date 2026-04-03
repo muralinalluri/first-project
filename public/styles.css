@@ -202,7 +202,7 @@ header {
 
 /* ── Main content ────────────────────────────────────────────────────────── */
 main {
-  max-width: 860px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 1.5rem 3rem;
   width: 100%;
@@ -445,14 +445,14 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
 }
 .summary-card {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.1rem 1.25rem;
   box-shadow: var(--shadow);
 }
 .summary-card.full-width { grid-column: 1 / -1; }
@@ -1640,7 +1640,7 @@ body.advisor-open #page-workflow.active .steps-bar {
 .hidden { display: none !important; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .summary-grid { grid-template-columns: 1fr; }
   .summary-card.full-width { grid-column: unset; }
   .form-row { flex-direction: column; align-items: flex-start; }
