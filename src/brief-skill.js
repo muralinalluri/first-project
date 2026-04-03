@@ -83,8 +83,6 @@ Return only the JSON object, no markdown or other text.`;
           parts.push(`    Key Points  : ${s.keyPoints.slice(0, 3).join(' | ')}`);
         if (s.actionItems?.length)
           parts.push(`    Action Items: ${s.actionItems.map(a => a.task).slice(0, 3).join(' | ')}`);
-        if (s.nextSteps?.length)
-          parts.push(`    Next Steps  : ${s.nextSteps.slice(0, 2).join(' | ')}`);
         return parts.join('\n');
       })
       .join('\n\n');

@@ -78,10 +78,6 @@ Return only the JSON object.`,
       parts.push('\nAction Items:');
       summary.actionItems.forEach(i => parts.push(`  - ${i.task} (${i.owner})`));
     }
-    if (summary.nextSteps?.length) {
-      parts.push('\nNext Steps:');
-      summary.nextSteps.forEach(s => parts.push(`  - ${s}`));
-    }
     return parts.join('\n');
   }
 }

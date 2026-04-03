@@ -158,7 +158,6 @@ app.get('/api/meetings', (req, res) => {
     keyPoints: data.keyPoints || [],
     decisions: data.decisions || [],
     actionItems: data.actionItems || [],
-    nextSteps: data.nextSteps || [],
     attendees: data.attendees || [],
   }));
   res.json({ meetings });

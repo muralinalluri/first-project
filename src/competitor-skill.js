@@ -28,7 +28,6 @@ export class CompetitorSkill {
         data.actionItems?.length
           ? `Actions: ${data.actionItems.map(a => a.task).join(' | ')}`
           : '',
-        data.nextSteps?.length ? `Next Steps: ${data.nextSteps.join(' | ')}` : '',
       ].filter(Boolean);
       return parts.join('\n');
     }).join('\n\n---\n\n');

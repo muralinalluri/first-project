@@ -31,13 +31,10 @@ Format your response as a JSON object with this exact structure:
   ],
   "actionItems": [
     {
-      "task": "What needs to be done",
+      "task": "What needs to be done — include any next steps or follow-up intentions here too, even if owner/deadline are unknown",
       "owner": "Who is responsible (or 'TBD' if not clear)",
       "deadline": "When it's due (or 'Not specified')"
     }
-  ],
-  "nextSteps": [
-    "Next step 1"
   ],
   "sentiment": "Overall meeting sentiment: positive/neutral/negative",
   "followUpRequired": true
@@ -91,7 +88,6 @@ export class Summarizer {
         keyPoints: [],
         decisions: [],
         actionItems: [],
-        nextSteps: [],
         sentiment: 'neutral',
         followUpRequired: true,
       };
@@ -145,12 +141,6 @@ export class Summarizer {
       summary.actionItems.forEach(item => {
         lines.push(`| ${item.task} | ${item.owner} | ${item.deadline} |`);
       });
-      lines.push('');
-    }
-
-    if (summary.nextSteps?.length) {
-      lines.push('## Next Steps');
-      summary.nextSteps.forEach(s => lines.push(`- ${s}`));
       lines.push('');
     }
 

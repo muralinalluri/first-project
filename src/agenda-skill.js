@@ -78,10 +78,6 @@ Return only the markdown agenda, no other text.`;
       parts.push('\nAction Items:');
       summary.actionItems.forEach(i => parts.push(`  - ${i.task} (Owner: ${i.owner}, Due: ${i.deadline})`));
     }
-    if (summary.nextSteps?.length) {
-      parts.push('\nNext Steps:');
-      summary.nextSteps.forEach(s => parts.push(`  - ${s}`));
-    }
     return parts.join('\n');
   }
 }

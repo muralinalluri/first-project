@@ -32,7 +32,6 @@ export class InsightsSkill {
       `Overview: ${data.overview || ''}`,
       ...(data.keyPoints   || []).map(p => `- ${p}`),
       ...(data.decisions   || []).map(d => `- ${d}`),
-      ...(data.nextSteps   || []).map(s => `- ${s}`),
       ...(data.actionItems || []).map(i => `- ${i.task}`),
     ].join('\n')).join('\n\n===\n\n');
 

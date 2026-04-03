@@ -489,8 +489,6 @@ function renderSummary(s, jsonPath, mdPath) {
 
   renderList('sum-keypoints', s.keyPoints);
   renderList('sum-decisions', s.decisions);
-  renderList('sum-nextsteps', s.nextSteps);
-
   // Action items table
   const tbody = $('sum-actions');
   tbody.innerHTML = '';
@@ -773,7 +771,6 @@ function openMeetingDetail(index) {
     <h3>Key Points</h3>${list(m.keyPoints)}
     <h3>Decisions Made</h3>${list(m.decisions)}
     <h3>Action Items</h3>${actionTable}
-    <h3>Next Steps</h3>${list(m.nextSteps)}
     ${m.attendees?.length ? `<h3>Attendees</h3><div class="attendee-chips">${m.attendees.map(a => `<span class="chip">${esc(a)}</span>`).join('')}</div>` : ''}
   `;
 

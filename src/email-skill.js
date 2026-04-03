@@ -149,11 +149,6 @@ Return only the JSON object, no other text.`;
       });
     }
 
-    if (summary.nextSteps?.length) {
-      parts.push('\nNext Steps:');
-      summary.nextSteps.forEach(s => parts.push(`  - ${s}`));
-    }
-
     return parts.join('\n');
   }
 
