@@ -786,6 +786,7 @@ $('meeting-detail-modal').addEventListener('click', e => {
 function showSkillResult(title, loading, content = '') {
   $('skill-modal-title').textContent = title;
   show($('skill-modal'));
+  hide($('skill-modal-email'));
   if (loading) {
     show($('skill-modal-loading'));
     $('skill-modal-loading-text').textContent = content || 'Running…';
@@ -803,11 +804,27 @@ $('btn-close-skill-modal').addEventListener('click', () => hide($('skill-modal')
 $('skill-modal').addEventListener('click', e => { if (e.target === $('skill-modal')) hide($('skill-modal')); });
 
 $('btn-copy-skill-modal').addEventListener('click', () => {
-  const text = $('skill-modal-content').textContent;
+  const text = $('skill-modal-content').textContent || $('btn-copy-skill-modal').dataset.copyText || '';
   navigator.clipboard.writeText(text)
     .then(() => toast('Copied!'))
     .catch(() => toast('Copy failed'));
 });
+
+// ── Email-specific modal renderer ─────────────────────────────────────────────
+function showEmailResult(title, email, savedPath) {
+  $('skill-modal-title').textContent = title;
+  show($('skill-modal'));
+  hide($('skill-modal-loading'));
+  hide($('skill-modal-content'));
+
+  $('skill-email-subject').textContent = email.subject || '';
+  $('skill-email-body').innerHTML = email.body || `<p>${esc(email.plainText || '')}</p>`;
+  show($('skill-modal-email'));
+
+  // Store plain text for copy button
+  $('btn-copy-skill-modal').dataset.copyText = `Subject: ${email.subject}\n\n${email.plainText}${savedPath ? `\n\n---\nSaved: ${savedPath}` : ''}`;
+  show($('btn-copy-skill-modal'));
+}
 
 // ── Skill helpers ─────────────────────────────────────────────────────────────
 function selectedSummaryId() {
@@ -841,7 +858,7 @@ $('skill-email').addEventListener('click', async () => {
     const res = await fetch('/api/skills/generate-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showSkillResult(label, false, `Subject: ${data.email.subject}\n\n${data.email.plainText}\n\n---\nSaved: ${data.txtPath}`);
+    showEmailResult(label, data.email, data.txtPath);
   } catch (err) {
     showSkillResult(label, false, `Error: ${err.message}`);
   }
@@ -857,7 +874,7 @@ $('skill-thankyou').addEventListener('click', async () => {
     const res = await fetch('/api/skills/thank-you-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    showSkillResult(label, false, `Subject: ${data.email.subject}\n\n${data.email.plainText}\n\n---\nSaved: ${data.txtPath}`);
+    showEmailResult(label, data.email, data.txtPath);
   } catch (err) {
     showSkillResult(label, false, `Error: ${err.message}`);
   }

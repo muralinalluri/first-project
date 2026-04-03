@@ -206,6 +206,7 @@ main {
   margin: 0 auto;
   padding: 0 1.5rem 3rem;
   width: 100%;
+  box-sizing: border-box;
   flex: 1;
 }
 
@@ -444,7 +445,7 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 
 .summary-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 .summary-card {
@@ -1406,6 +1407,37 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   margin: 0;
 }
 
+/* Email rendered inside skill modal */
+.skill-modal-email { display: flex; flex-direction: column; }
+.skill-email-subject-bar {
+  background: var(--navy);
+  color: #fff;
+  padding: .75rem 1.1rem;
+  font-size: .88rem;
+  display: flex;
+  gap: .5rem;
+  align-items: baseline;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.skill-email-subject-label { color: rgba(255,255,255,.55); font-weight: 600; white-space: nowrap; }
+#skill-email-subject { font-weight: 700; }
+.skill-email-body {
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 1.25rem 1.5rem;
+  font-size: .88rem;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+.skill-email-body p { margin-bottom: .75rem; }
+.skill-email-body ul, .skill-email-body ol { padding-left: 1.25rem; margin-bottom: .75rem; }
+.skill-email-body li { margin-bottom: .25rem; }
+.skill-email-body strong { color: var(--text); }
+.skill-email-body table { border-collapse: collapse; width: 100%; margin-bottom: .75rem; }
+.skill-email-body td, .skill-email-body th { border: 1px solid var(--border); padding: .4rem .7rem; font-size: .84rem; }
+.skill-email-body th { background: var(--bg3); }
+
 /* ── Live Advisor panel (fixed right) ────────────────────────────────────── */
 .live-advisor {
   position: fixed;
@@ -1425,10 +1457,13 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 .live-advisor.open {
   transform: translateX(0);
 }
-body.advisor-open main,
-body.advisor-open .steps-bar {
-  padding-right: 376px;
+#page-workflow.active main,
+#page-workflow.active .steps-bar {
   transition: padding-right .35s cubic-bezier(.4,0,.2,1);
+}
+body.advisor-open #page-workflow.active main,
+body.advisor-open #page-workflow.active .steps-bar {
+  padding-right: 376px;
 }
 
 .live-advisor-header {
