@@ -60,29 +60,37 @@
       <!-- PANEL 1 — RECORD -->
       <section class="panel active" id="panel-record">
         <div class="panel-header">
-          <h2>Record Meeting</h2>
-          <p>Start recording your meeting, then stop when done. Or upload an existing audio file.</p>
+          <div class="panel-header-text">
+            <h2>Record Meeting</h2>
+            <p>Start recording your meeting, then stop when done. Or upload an existing audio file.</p>
+          </div>
         </div>
         <div class="record-area">
           <div class="visualizer-wrap">
-            <canvas id="visualizer" width="600" height="80"></canvas>
+            <canvas id="visualizer" width="600" height="100"></canvas>
           </div>
-          <div class="timer" id="timer">00:00</div>
-          <div class="record-controls">
-            <button id="btn-record" class="btn-record">
-              <span class="btn-record-icon">●</span>
-              Start Recording
-            </button>
-            <button id="btn-stop" class="btn-stop" disabled>
-              <span>■</span> Stop
-            </button>
+          <div class="record-cols">
+            <div class="record-capture-col">
+              <div class="timer" id="timer">00:00</div>
+              <div class="record-controls">
+                <button id="btn-record" class="btn-record">
+                  <span class="btn-record-icon">●</span>
+                  Start Recording
+                </button>
+                <button id="btn-stop" class="btn-stop" disabled>
+                  <span>■</span> Stop
+                </button>
+              </div>
+            </div>
+            <div class="record-upload-col">
+              <div class="record-upload-label">Upload a file</div>
+              <label class="upload-area" id="upload-area">
+                <input type="file" id="file-input" accept="audio/*,video/*" hidden />
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span id="upload-label">Click to upload audio / video file</span>
+              </label>
+            </div>
           </div>
-          <div class="divider"><span>or</span></div>
-          <label class="upload-area" id="upload-area">
-            <input type="file" id="file-input" accept="audio/*,video/*" hidden />
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <span id="upload-label">Click to upload audio / video file</span>
-          </label>
         </div>
         <div id="audio-preview" class="audio-preview hidden">
           <audio id="audio-player" controls></audio>
@@ -100,19 +108,42 @@
       <!-- PANEL 2 — TRANSCRIBE -->
       <section class="panel" id="panel-transcribe">
         <div class="panel-header">
-          <h2>Transcription</h2>
-          <p>Review and edit the transcript before summarizing.</p>
+          <div class="panel-header-text">
+            <h2>Transcription</h2>
+            <p>Review and edit the transcript before summarizing.</p>
+          </div>
         </div>
         <div id="transcribe-loading" class="loading-state hidden">
           <div class="spinner"></div>
           <p>Transcribing with Claude AI…</p>
         </div>
         <div id="transcribe-content" class="hidden">
-          <div class="textarea-toolbar">
-            <span class="word-count" id="word-count">0 words</span>
-            <button class="btn-ghost" id="btn-clear-transcript">Clear</button>
+          <div class="transcribe-layout">
+            <div class="transcribe-main">
+              <div class="textarea-toolbar">
+                <span class="word-count" id="word-count">0 words</span>
+                <button class="btn-ghost" id="btn-clear-transcript">Clear</button>
+              </div>
+              <textarea id="transcript-text" placeholder="Transcript will appear here…" rows="18" spellcheck="true"></textarea>
+            </div>
+            <div class="transcribe-sidebar">
+              <div class="meta-card">
+                <h3>Meeting Details</h3>
+                <div class="meta-fields">
+                  <input id="meeting-name" type="text" placeholder="Meeting name (optional)" class="meta-input" />
+                  <input id="attendees" type="text" placeholder="Attendees, comma-separated" class="meta-input" />
+                </div>
+              </div>
+              <div class="meta-card transcribe-tips">
+                <h3>Tips</h3>
+                <ul>
+                  <li>Review and correct any transcription errors before summarizing</li>
+                  <li>Speakers appear as "Speaker 1", "Speaker 2" etc.</li>
+                  <li>Add a meeting name &amp; attendees for richer summaries</li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <textarea id="transcript-text" placeholder="Transcript will appear here…" rows="12" spellcheck="true"></textarea>
         </div>
         <div id="transcribe-empty" class="empty-state">
           <div class="empty-icon">📝</div>
@@ -120,10 +151,6 @@
         </div>
         <div class="panel-actions">
           <button class="btn-ghost" id="btn-back-to-record">← Back</button>
-          <div class="meeting-meta">
-            <input id="meeting-name" type="text" placeholder="Meeting name (optional)" class="meta-input" />
-            <input id="attendees" type="text" placeholder="Attendees, comma-separated (optional)" class="meta-input" />
-          </div>
           <button id="btn-to-summarize" class="btn-primary" disabled>Summarize →</button>
         </div>
       </section>
@@ -131,8 +158,10 @@
       <!-- PANEL 3 — SUMMARY -->
       <section class="panel" id="panel-summary">
         <div class="panel-header">
-          <h2>Meeting Summary</h2>
-          <p>Structured summary generated by Claude AI.</p>
+          <div class="panel-header-text">
+            <h2>Meeting Summary</h2>
+            <p>Structured summary generated by Claude AI.</p>
+          </div>
         </div>
         <div id="summary-loading" class="loading-state hidden">
           <div class="spinner"></div>
@@ -171,8 +200,10 @@
       <!-- PANEL 4 — EMAIL -->
       <section class="panel" id="panel-email">
         <div class="panel-header">
-          <h2>Follow-up Email</h2>
-          <p>Customize and generate a professional follow-up email for attendees.</p>
+          <div class="panel-header-text">
+            <h2>Follow-up Email</h2>
+            <p>Customize and generate a professional follow-up email for attendees.</p>
+          </div>
         </div>
         <div class="email-options">
           <div class="form-row">

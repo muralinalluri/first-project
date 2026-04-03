@@ -161,7 +161,7 @@ header {
   justify-content: center;
   gap: 0;
   padding: 1.25rem 2rem;
-  max-width: 860px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
@@ -202,9 +202,9 @@ header {
 
 /* ── Main content ────────────────────────────────────────────────────────── */
 main {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1.5rem 3rem;
+  padding: 0 2rem 3rem;
   width: 100%;
   box-sizing: border-box;
   flex: 1;
@@ -214,14 +214,23 @@ main {
 .panel {
   display: none;
   animation: fadeIn .25s ease;
+  padding-top: 1.75rem;
 }
 .panel.active { display: block; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-.panel-header { margin-bottom: 1.5rem; }
-.panel-header h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: .3rem; color: var(--navy); }
-.panel-header p  { color: var(--text-muted); font-size: .9rem; }
+.panel-header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.panel-header-text { flex: 1; }
+.panel-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: .3rem; color: var(--navy); }
+.panel-header p  { color: var(--text-muted); font-size: .9rem; line-height: 1.5; }
 
 .panel-actions {
   display: flex;
@@ -265,22 +274,52 @@ main {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .visualizer-wrap {
   width: 100%;
   background: #001C55;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  border: 1px solid rgba(0,94,184,.3);
+  border-bottom: 1px solid rgba(0,94,184,.3);
 }
-canvas#visualizer { display: block; width: 100%; height: 80px; }
+canvas#visualizer { display: block; width: 100%; height: 100px; }
+
+/* Two-column layout inside record-area */
+.record-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.record-capture-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2.25rem 2.5rem;
+  border-right: 1px solid var(--border);
+  justify-content: center;
+}
+.record-upload-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2.25rem 2.5rem;
+  justify-content: center;
+}
+.record-upload-col .upload-area {
+  flex: 1;
+  min-height: 110px;
+}
+.record-upload-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  margin-bottom: .85rem;
+}
 
 .timer {
   font-size: 2.5rem;
@@ -422,6 +461,60 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 }
 .meta-input:focus, .form-input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,48,135,.1); }
 
+/* ── Transcribe panel 2-col layout ─────────────────────────────────────── */
+.transcribe-layout {
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  gap: 1.5rem;
+  align-items: start;
+}
+.transcribe-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 72px;
+}
+.meta-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.meta-card h3 {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: .85rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.meta-fields {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+.meta-fields .meta-input { min-width: 0; width: 100%; flex: unset; }
+.transcribe-tips ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  padding: 0;
+  margin: 0;
+}
+.transcribe-tips ul li {
+  font-size: .82rem;
+  color: var(--text-muted);
+  padding-left: 1rem;
+  position: relative;
+  line-height: 1.6;
+}
+.transcribe-tips ul li::before { content: '▸'; position: absolute; left: 0; color: var(--gold); }
+
 /* ── Summary panel ───────────────────────────────────────────────────────── */
 .summary-meta-bar {
   display: flex;
@@ -429,8 +522,14 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   gap: 1rem;
   margin-bottom: 1.25rem;
   flex-wrap: wrap;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
 }
-.sum-title { font-size: 1.15rem; font-weight: 700; flex: 1; }
+.sum-title { font-size: 1.2rem; font-weight: 700; flex: 1; color: var(--navy); }
 
 .badge {
   font-size: .72rem;
@@ -1640,6 +1739,13 @@ body.advisor-open #page-workflow.active .steps-bar {
 .hidden { display: none !important; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .record-cols { grid-template-columns: 1fr; }
+  .record-capture-col { border-right: none; border-bottom: 1px solid var(--border); padding: 2rem; }
+  .record-upload-col { padding: 2rem; }
+  .transcribe-layout { grid-template-columns: 1fr; }
+  .transcribe-sidebar { position: static; }
+}
 @media (max-width: 700px) {
   .summary-grid { grid-template-columns: 1fr; }
   .summary-card.full-width { grid-column: unset; }
