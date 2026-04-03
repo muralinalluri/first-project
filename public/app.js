@@ -615,24 +615,22 @@ function renderAttachments(container, attachments) {
   if (!container) return;
   if (!attachments?.length) { hide(container); return; }
   container.innerHTML = `
-    <div class="email-attachments-label">
+    <span class="email-attachments-label">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
       Enclosed Materials
-    </div>
-    <div class="email-attachments-list">
-      ${attachments.map(a => `
-        <a class="attachment-chip" href="/api/factsheet/${a.key}" target="_blank" rel="noopener" title="Open Fact Sheet &amp; Fund Story in new tab">
-          <span class="attachment-chip-icon">📄</span>
-          <div class="attachment-chip-info">
-            <span class="attachment-chip-name">${esc(a.name)}</span>
-            <div class="attachment-chip-meta">
-              ${a.ticker ? `<span class="attachment-chip-ticker">${esc(a.ticker)}</span>` : ''}
-              <span class="attachment-chip-type">${esc(a.assetClass || a.category)}</span>
-            </div>
+    </span>
+    ${attachments.map(a => `
+      <a class="attachment-chip" href="/api/factsheet/${a.key}" target="_blank" rel="noopener" title="Open Fact Sheet &amp; Fund Story in new tab">
+        <span class="attachment-chip-icon">📄</span>
+        <div class="attachment-chip-info">
+          <span class="attachment-chip-name">${esc(a.name)}</span>
+          <div class="attachment-chip-meta">
+            ${a.ticker ? `<span class="attachment-chip-ticker">${esc(a.ticker)}</span>` : ''}
+            <span class="attachment-chip-type">${esc(a.assetClass || a.category)}</span>
           </div>
-          <span class="attachment-chip-action">Fact Sheet ↗</span>
-        </a>`).join('')}
-    </div>`;
+        </div>
+        <span class="attachment-chip-action">Fact Sheet ↗</span>
+      </a>`).join('')}`;
   show(container);
 }
 

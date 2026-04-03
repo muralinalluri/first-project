@@ -691,11 +691,13 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 /* ── Email attachments ───────────────────────────────────────────────────────── */
 .email-attachments {
   border-bottom: 1px solid var(--border);
-  padding: .9rem 1.25rem;
+  padding: .75rem 1.25rem;
   background: var(--bg3);
   display: flex;
-  flex-direction: column;
-  gap: .55rem;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 .email-attachments-label {
   font-size: .68rem;
@@ -706,11 +708,11 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
   display: flex;
   align-items: center;
   gap: .4rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .email-attachments-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
+  display: contents;
 }
 .attachment-chip {
   display: inline-flex;
