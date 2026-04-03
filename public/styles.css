@@ -690,7 +690,7 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 
 /* ── Email attachments ───────────────────────────────────────────────────────── */
 .email-attachments {
-  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: .9rem 1.25rem;
   background: var(--bg3);
   display: flex;
