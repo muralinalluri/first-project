@@ -611,6 +611,19 @@ function renderEmail(email, htmlPath, txtPath, attachments) {
   renderAttachments($('email-attachments'), attachments);
 }
 
+// Client-side URL map — ensures links go to am.jpmorgan.com even if server
+// doesn't return factSheetUrl (e.g. server not yet restarted).
+const PRODUCT_URLS = {
+  JEPI:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-equity-premium-income-etf-etf-shares-46641q332',
+  JEPQ:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-nasdaq-equity-premium-income-etf-etf-shares-46654q203',
+  JPST:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-ultra-short-income-etf-etf-shares-46641q837',
+  JGRO:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-active-growth-etf-etf-shares-46654q609',
+  JPRE:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-realty-income-etf-etf-shares-46641q126',
+  JIRE:          'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-international-research-enhanced-equity-etf-etf-shares-46641q134',
+  INCOME_FUND:   'https://am.jpmorgan.com/us/en/asset-management/adv/products/jpmorgan-income-fund-a-46637k240',
+  SMARTRETIREMENT:'https://am.jpmorgan.com/us/en/asset-management/adv/investment-strategies/multi-asset/smartretirement/',
+};
+
 function renderAttachments(container, attachments) {
   if (!container) return;
   if (!attachments?.length) { hide(container); return; }
@@ -621,7 +634,7 @@ function renderAttachments(container, attachments) {
     </div>
     <div class="email-attachments-chips">
       ${attachments.map(a => {
-        const url = a.factSheetUrl || `/api/factsheet/${a.key}`;
+        const url = a.factSheetUrl || PRODUCT_URLS[a.key] || `/api/factsheet/${a.key}`;
         return `<a class="attachment-chip" href="${url}" target="_blank" rel="noopener">
           ${a.ticker ? `<span class="attachment-chip-ticker">${esc(a.ticker)}</span>` : ''}
           <span class="attachment-chip-name">${esc(a.name)}</span>
