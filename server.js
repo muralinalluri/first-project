@@ -119,7 +119,7 @@ app.post('/api/email', async (req, res) => {
     const attachments = (email.attachedProducts || [])
       .map(key => getProduct(key))
       .filter(Boolean)
-      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass, factSheetUrl: p.factSheetUrl || null }));
 
     const { htmlPath, txtPath } = skill.saveEmail(email);
     res.json({ email, htmlPath, txtPath, attachments });
@@ -255,7 +255,7 @@ app.post('/api/skills/generate-email', async (req, res) => {
     const email = await skill.generateEmail(summary, { tone, availableProducts: getProductsForPrompt() });
     const attachments = (email.attachedProducts || [])
       .map(key => getProduct(key)).filter(Boolean)
-      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass, factSheetUrl: p.factSheetUrl || null }));
     const { htmlPath, txtPath } = skill.saveEmail(email);
     res.json({ email, htmlPath, txtPath, title: summary.title, attachments });
   } catch (err) {
@@ -282,7 +282,7 @@ app.post('/api/skills/thank-you-email', async (req, res) => {
     const email = await skill.generateEmail(summary, { tone, emailType: 'thank-you', availableProducts: getProductsForPrompt() });
     const attachments = (email.attachedProducts || [])
       .map(key => getProduct(key)).filter(Boolean)
-      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass }));
+      .map(p => ({ key: p.key, name: p.name, ticker: p.ticker, category: p.category, assetClass: p.assetClass, factSheetUrl: p.factSheetUrl || null }));
     const { htmlPath, txtPath } = skill.saveEmail(email, 'thankyou-email');
     res.json({ email, htmlPath, txtPath, title: summary.title, attachments });
   } catch (err) {

@@ -691,88 +691,66 @@ textarea:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px
 /* ── Email attachments ───────────────────────────────────────────────────────── */
 .email-attachments {
   border-bottom: 1px solid var(--border);
-  padding: .75rem 1.25rem;
+  padding: .65rem 1.25rem .7rem;
   background: var(--bg3);
   display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-direction: column;
+  gap: .45rem;
 }
 .email-attachments-label {
-  font-size: .68rem;
+  font-size: .65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .09em;
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: .4rem;
-  white-space: nowrap;
-  flex-shrink: 0;
+  gap: .35rem;
 }
-.email-attachments-list {
-  display: contents;
+.email-attachments-chips {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: nowrap;
 }
 .attachment-chip {
   display: inline-flex;
   align-items: center;
-  gap: .55rem;
+  gap: .45rem;
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: .5rem .85rem;
+  border-radius: 6px;
+  padding: .4rem .75rem;
   text-decoration: none;
-  transition: border-color .2s, box-shadow .2s;
-  cursor: pointer;
+  transition: border-color .18s, background .18s;
+  min-width: 0;
 }
 .attachment-chip:hover {
   border-color: var(--navy);
-  box-shadow: 0 2px 8px rgba(0,48,135,.1);
+  background: #EAF0F8;
 }
-.attachment-chip-icon {
-  font-size: 1.15rem;
+.attachment-chip-ticker {
+  font-size: .72rem;
+  font-weight: 700;
+  background: var(--navy);
+  color: #fff;
+  padding: .15rem .45rem;
+  border-radius: 3px;
   flex-shrink: 0;
-}
-.attachment-chip-info {
-  display: flex;
-  flex-direction: column;
-  gap: .1rem;
-  min-width: 0;
 }
 .attachment-chip-name {
   font-size: .82rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--navy);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 240px;
 }
-.attachment-chip-meta {
-  display: flex;
-  align-items: center;
-  gap: .35rem;
-}
-.attachment-chip-ticker {
-  font-size: .68rem;
-  font-weight: 700;
-  background: var(--navy);
-  color: #fff;
-  padding: .1rem .4rem;
-  border-radius: 3px;
-}
-.attachment-chip-type {
-  font-size: .68rem;
-  color: var(--text-muted);
-}
-.attachment-chip-action {
-  font-size: .7rem;
-  font-weight: 600;
+.attachment-chip-arrow {
+  font-size: .78rem;
   color: var(--gold);
-  white-space: nowrap;
-  border-left: 1px solid var(--border);
-  padding-left: .55rem;
+  font-weight: 700;
+  flex-shrink: 0;
   margin-left: .1rem;
 }
 
